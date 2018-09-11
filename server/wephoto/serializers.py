@@ -5,5 +5,5 @@ from wephoto.models import *
 class UploadedImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = UploadedImage
-        fields = ('id', 'file')
+        fields = ('id', 'file', 'tag')
 

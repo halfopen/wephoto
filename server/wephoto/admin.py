@@ -29,13 +29,13 @@ class MyImageWidget(ImageWidget):
 
 
 class PhotographerAdmin(admin.ModelAdmin):
-    list_display = ('name', 'avator_image')
+    list_display = ('phone', 'username', 'avator_image')
     formfield_overrides = {models.ImageField: {'widget': MyImageWidget}}
 
     readonly_fields = ('works_url', )
 
     def works_url(self, obj):
-        return format_html("""<a href='/admin/wephoto/uploadedimage/?q={0}'　target='_blank'>作品集</a>""", str(obj.id)+"-works")
+        return format_html("""<a href='/admin/wephoto/uploadedimage/?q={0}'　target='_blank'>作品集</a>""", str(obj.phone)+"-works")
 
 
 class UploadedImageAdmin(admin.ModelAdmin):
@@ -44,9 +44,19 @@ class UploadedImageAdmin(admin.ModelAdmin):
     formfield_overrides = {models.ImageField: {'widget': MyImageWidget}}
 
 
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ('model_user', 'photographer', 'type', 'price', 'place', 'place_type')
+    list_filter = ('year', 'month', 'day')
+
+
+class ReviewAdmin(admin.ModelAdmin):
+    list_display = ('photographer', 'is_reviewed', 'comment')
+    list_filter = ('is_reviewed',)
+
+
 admin.site.register(Photographer, PhotographerAdmin)
 admin.site.register(Review)
-admin.site.register(Order)
+admin.site.register(Order, OrderAdmin)
 admin.site.register(CommonUser)
 admin.site.register(Tag)
 admin.site.register(UploadedImage, UploadedImageAdmin)
