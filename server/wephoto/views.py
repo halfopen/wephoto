@@ -7,10 +7,16 @@ import hashlib
 from server import tokens
 
 
-# 一些初始化
-tags = Tag.objects.count()
-if tags == 0:
-    tags_list = ['时尚']
+try:
+    tags = Tag.objects.count()
+    if tags == 0:
+        tags_list = ['时尚', '写真', '少女', '海边', '艺术']
+        for t in tags_list:
+            o = Tag(content=t)
+            o.save()
+except:
+    pass
+
 
 class BaseJsonResponse:
     def __init__(self, info, data):
@@ -51,4 +57,9 @@ def login(req):
 
 
 def like(req):
+    """
+        收藏
+    :param req:
+    :return:
+    """
     pass

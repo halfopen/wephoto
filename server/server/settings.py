@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'imagekit',
-    'wephoto'
+    'wephoto',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -143,3 +144,12 @@ STATICFILES_DIRS = (
   ("media", MEDIA_ROOT+"media"),
 
 )
+
+
+REST_FRAMEWORK = {
+    # 分页显示
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 10,
+    # 配置过滤
+    'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',)
+}

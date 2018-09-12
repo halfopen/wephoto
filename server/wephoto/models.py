@@ -33,26 +33,27 @@ class User(models.Model):
     """
         用户抽象类
     """
-    phone = models.CharField(max_length=32, null=False, primary_key=True)
-    username = models.CharField(max_length=1024, verbose_name="用户名")
-    password = models.CharField(max_length=1024, verbose_name="密码")
+    phone = models.CharField(max_length=32, null=False, unique=True)
+    username = models.CharField(max_length=1024, verbose_name="用户名", null=False, blank=False)
+    password = models.CharField(max_length=1024, verbose_name="密码", null=False, blank=False)
     gender = models.IntegerField(default=0, choices=((0, u"男"), (1, u"女")))
-    avator = models.ImageField(upload_to="avator", blank=True, verbose_name="头像", null=True)
+    avatar = models.ImageField(upload_to="avatar", blank=True, verbose_name="头像", null=True)
 
-    qq = models.CharField(max_length=32, null=True)
-    wechat = models.CharField(max_length=32, null=True)
+    qq = models.CharField(max_length=32, null=True, blank=True)
+    wechat = models.CharField(max_length=32, null=True, blank=True)
 
     money = models.FloatField(default=0.0, verbose_name=u"余额")
     in_order_money = models.FloatField(default=0.1, verbose_name=u"冻结金额")
 
+
     class Meta:
         abstract = True
 
-    def avator_image(self):
-        return '<img style="width:60px; height:60px" src="/media/%s"/>' % self.avator
+    def avatar_image(self):
+        return '<img style="width:60px; height:60px" src="/media/%s"/>' % self.avatar
 
-    avator_image.allow_tags = True
-    avator_image.verbose_name = "头像"
+    avatar_image.allow_tags = True
+    avatar_image.verbose_name = "头像"
 
     def __str__(self):
         return self.phone+"-"+self.username
@@ -63,13 +64,29 @@ class Photographer(User):
         摄影师
     """
 
-    is_reviewed = models.IntegerField(default=0, verbose_name="是否审核通过")
-    tags = models.ManyToManyField(Tag)
-    desc = models.CharField(max_length=4096, verbose_name=u"个人签名")
+    is_reviewed = models.IntegerField(default=0, verbose_name="是否审核通过",
+                                      choices=((0, u"未提交"), (1, u"审核中"), (2, u"审核通过"), (-1, u"审核未通过")))
+    tags = models.ManyToManyField(Tag, null=True, blank=True)
+    desc = models.CharField(max_length=4096, verbose_name=u"个人签名", null=True, blank=True, default="")
     home_img = models.ImageField(verbose_name=u"主页图片", null=True, blank=True)
     pay_way = models.IntegerField(default=0, verbose_name=u"收费方式", choices=((0, u"互免"), (1, u"收费")))
     price = models.FloatField(default=0.0, verbose_name=u"价格")
+    price_area = models.CharField(verbose_name=u"价格区间", help_text=u"自动生成，不需要填写", default="0-100", max_length=1024)
     visit = models.IntegerField(default=0, verbose_name=u"访问量")
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+
+        if self.price is not None:
+            if self.price<100:
+                self.price_area = "0-100"
+            elif self.price<500:
+                self.price_area = "100-500"
+            elif self.price<1000:
+                self.price_area = "500-1000"
+            else:
+                self.price_area = "1000-"
+
+        super().save(force_insert, force_update, using, update_fields)
 
     class Meta:
         verbose_name = u"摄影师"
@@ -79,6 +96,9 @@ class CommonUser(User):
     """
 
     """
+
+    likes = models.ManyToManyField(Photographer) # 普通用户才能收藏
+
     class Meta:
         verbose_name = u"普通用户"
 

@@ -7,3 +7,42 @@ class UploadedImageSerializer(serializers.ModelSerializer):
         model = UploadedImage
         fields = ('id', 'file', 'tag')
 
+
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ('id', 'content', 'count')
+
+
+class PhotographerSerializer(serializers.ModelSerializer):
+    tags = TagSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Photographer
+        fields = ('id', 'phone', 'username', 'password', 'gender', "avatar", "qq", "wechat", "money", "in_order_money",
+                  "is_reviewed", "tags", "desc", "home_img", "pay_way", "price", "visit")
+
+
+class CommonUserSerializer(serializers.ModelSerializer):
+    likes = PhotographerSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = CommonUser
+        fields = ('id', 'phone', 'username', 'password', 'gender', 'avatar', 'qq', 'wechat', 'money', 'in_order_money', 'likes')
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    photographer = PhotographerSerializer(read_only=True)
+
+    class Meta:
+        model = Review
+        fields = ('id', 'photographer', 'id_card_1', 'id_card_2', 'device_1', 'device_2', 'device_3', 'is_reviewed', 'comment')
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    # photographer = PhotographerSerializer(read_only=True)
+    # model_user = CommonUserSerializer(read_only=True)
+
+    class Meta:
+        model = Order
+        fields = ('id', 'photographer', 'model_user', 'type', 'price', 'place', 'place_type', 'year', 'month', 'day')

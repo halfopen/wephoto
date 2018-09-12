@@ -22,14 +22,15 @@ class MyImageWidget(ImageWidget):
         input_html = super(ImageWidget, self).render(name, value, attrs)
         image_html = value
         if hasattr(value, 'name'):
-            image_html = '<a href="/media/%s" target="_blank"><img style="width:200px; height:200px" src="/media/%s"/></a>' %( value.name, value.name)
+            image_html = '<a href="/media/%s" target="_blank"><img style="width:200px; height:200px" ' \
+                         'src="/media/%s"/></a>' % (value.name, value.name)
         output = self.template % {'input': input_html,
                                   'image': image_html}
         return mark_safe(output)
 
 
 class PhotographerAdmin(admin.ModelAdmin):
-    list_display = ('phone', 'username', 'avator_image')
+    list_display = ('phone', 'username', 'avatar_image')
     formfield_overrides = {models.ImageField: {'widget': MyImageWidget}}
 
     readonly_fields = ('works_url', )
