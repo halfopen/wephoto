@@ -14,27 +14,19 @@ class TagSerializer(serializers.ModelSerializer):
         fields = ('id', 'content', 'count')
 
 
-class PhotographerSerializer(serializers.ModelSerializer):
-    tags = TagSerializer(many=True, read_only=True)
+class UserSerializer(serializers.ModelSerializer):
+    # tags = TagSerializer(many=True)
 
-    password = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True)  # 不可查看
 
     class Meta:
-        model = Photographer
+        model = User
         fields = ('id', 'phone', 'username', 'password', 'gender', "avatar", "qq", "wechat", "money", "in_order_money",
-                  "is_reviewed", "tags", "desc", "home_img", "pay_way", "price", "visit")
-
-
-class CommonUserSerializer(serializers.ModelSerializer):
-    likes = PhotographerSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = CommonUser
-        fields = ('id', 'phone', 'username', 'password', 'gender', 'avatar', 'qq', 'wechat', 'money', 'in_order_money', 'likes')
+                  "is_reviewed", "tags", "desc", "home_img", "pay_way", "price", "visit", "album")
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    photographer = PhotographerSerializer(read_only=True)
+    # photographer = PhotographerSerializer(read_only=True)
 
     class Meta:
         model = Review

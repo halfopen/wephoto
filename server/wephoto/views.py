@@ -46,11 +46,11 @@ def login(req):
     if True or user_type == 0:
         user = None
         try:
-            user = Photographer.objects.get(username=username, password=password)
+            user = User.objects.get(username=username, password=password)
             sec_str = str(user.id)+"-"+user.password+settings.SECRET_KEY
             token = hashlib.sha1(sec_str.encode("utf-8")).hexdigest()
             tokens[token] = 1
-        except Photographer.DoesNotExist:
+        except User.DoesNotExist:
             print("用户名，密码错误")
 
         return JsonResponse(BaseJsonResponse("ok", user).info())

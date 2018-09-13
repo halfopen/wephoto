@@ -10,6 +10,11 @@ class ReviewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
 
+    # 使用过滤器
+    filter_backends = (DjangoFilterBackend,)
+    # 等值
+    filter_fields = ('tag',)
+
 
 class TagSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
@@ -21,19 +26,14 @@ class UploadedImageSet(viewsets.ModelViewSet):
     serializer_class = UploadedImageSerializer
 
 
-class CommonUserSet(viewsets.ModelViewSet):
-    queryset = CommonUser.objects.all()
-    serializer_class = CommonUserSerializer
-
-
 class OrderSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
 
 
-class PhotographerSet(viewsets.ModelViewSet):
+class UserSet(viewsets.ModelViewSet):
     # queryset = Photographer.objects.all()
-    serializer_class = PhotographerSerializer
+    serializer_class = UserSerializer
 
     # 使用过滤器
     filter_backends = (DjangoFilterBackend,)
@@ -41,7 +41,7 @@ class PhotographerSet(viewsets.ModelViewSet):
     filter_fields = ('gender', 'pay_way')
 
     def get_queryset(self):
-        queryset = Photographer.objects.all()
+        queryset = User.objects.all()
 
         price_min = self.request.query_params.get("price_min", None)
         price_max = self.request.query_params.get("price_max", None)

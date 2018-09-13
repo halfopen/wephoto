@@ -14,6 +14,9 @@ class UploadedImage(models.Model):
     class Meta:
         verbose_name = u"上传的图片"
 
+    def __str__(self):
+        return self.file.name + " "+ self.tag
+
 
 class Tag(models.Model):
     """
@@ -33,21 +36,37 @@ class User(models.Model):
     """
         用户抽象类
     """
-    phone = models.CharField(max_length=32, null=False, unique=True)
+    phone = models.CharField(max_length=32, null=False, unique=True, verbose_name=u"手机")
     username = models.CharField(max_length=1024, verbose_name="用户名", null=False, blank=False)
     password = models.CharField(max_length=1024, verbose_name="密码", null=False, blank=False)
     gender = models.IntegerField(default=0, choices=((0, u"男"), (1, u"女")))
     avatar = models.ImageField(upload_to="avatar", blank=True, verbose_name="头像", null=True)
 
-    qq = models.CharField(max_length=32, null=True, blank=True)
-    wechat = models.CharField(max_length=32, null=True, blank=True)
+    qq = models.CharField(max_length=32, null=True, blank=True, verbose_name=u"QQ号")
+    wechat = models.CharField(max_length=32, null=True, blank=True, verbose_name=u"微信号")
+    birthday = models.DateField(verbose_name="出生年月日", null=True, blank=True)
 
-    money = models.FloatField(default=0.0, verbose_name=u"余额")
-    in_order_money = models.FloatField(default=0.1, verbose_name=u"冻结金额")
+    money = models.FloatField(default=0.0, verbose_name=u"余额", blank=True, null=True)
+    in_order_money = models.FloatField(default=0.0, verbose_name=u"冻结金额", blank=True, null=True)
+    album = models.ManyToManyField(UploadedImage, verbose_name=u"相册", blank=True, null=True)
+    bank_card = models.CharField(max_length=1024, verbose_name=u"银行卡", blank=True, null=True)
 
+    address = models.CharField(default="", max_length=1024, verbose_name=u"所在地区", null=True, blank=True)
+    # 以下为摄影师字段
+    user_type = models.BooleanField(verbose_name=u"是否为摄影师", choices=((False, u"普通用户"), (True, u"摄影师")))
+    is_reviewed = models.IntegerField(default=0, verbose_name="是否审核通过",
+                                      choices=((0, u"未提交"), (1, u"审核中"), (2, u"审核通过"), (-1, u"审核未通过")), blank=True)
+    tags = models.ManyToManyField(Tag, blank=True, null=True)
+    desc = models.CharField(max_length=4096, verbose_name=u"个人签名", null=True, blank=True, default="")
+    home_img = models.ImageField(verbose_name=u"主页图片", null=True, blank=True)
+    pay_way = models.IntegerField(default=0, verbose_name=u"收费方式", choices=((0, u"互免"), (1, u"收费")), null=True, blank=True)
+    price = models.FloatField(default=0.0, verbose_name=u"价格", null=True, blank=True)
+    visit = models.IntegerField(default=0, verbose_name=u"访问量", null=True, blank=True)
+
+    likes = models.ManyToManyField("self", verbose_name="收藏", null=True, blank=True)  # 普通用户才能收藏
 
     class Meta:
-        abstract = True
+        verbose_name = u"用户"
 
     def avatar_image(self):
         return '<img style="width:60px; height:60px" src="/media/%s"/>' % self.avatar
@@ -59,55 +78,11 @@ class User(models.Model):
         return self.phone+"-"+self.username
 
 
-class Photographer(User):
-    """
-        摄影师
-    """
-
-    is_reviewed = models.IntegerField(default=0, verbose_name="是否审核通过",
-                                      choices=((0, u"未提交"), (1, u"审核中"), (2, u"审核通过"), (-1, u"审核未通过")))
-    tags = models.ManyToManyField(Tag, null=True, blank=True)
-    desc = models.CharField(max_length=4096, verbose_name=u"个人签名", null=True, blank=True, default="")
-    home_img = models.ImageField(verbose_name=u"主页图片", null=True, blank=True)
-    pay_way = models.IntegerField(default=0, verbose_name=u"收费方式", choices=((0, u"互免"), (1, u"收费")))
-    price = models.FloatField(default=0.0, verbose_name=u"价格")
-    price_area = models.CharField(verbose_name=u"价格区间", help_text=u"自动生成，不需要填写", default="0-100", max_length=1024)
-    visit = models.IntegerField(default=0, verbose_name=u"访问量")
-
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-
-        if self.price is not None:
-            if self.price<100:
-                self.price_area = "0-100"
-            elif self.price<500:
-                self.price_area = "100-500"
-            elif self.price<1000:
-                self.price_area = "500-1000"
-            else:
-                self.price_area = "1000-"
-
-        super().save(force_insert, force_update, using, update_fields)
-
-    class Meta:
-        verbose_name = u"摄影师"
-
-
-class CommonUser(User):
-    """
-
-    """
-
-    likes = models.ManyToManyField(Photographer) # 普通用户才能收藏
-
-    class Meta:
-        verbose_name = u"普通用户"
-
-
 class Review(models.Model):
     """
         审核记录
     """
-    photographer = models.OneToOneField(Photographer)
+    photographer = models.OneToOneField(User)
     id_card_1 = models.ImageField(verbose_name="正面身份证")
     id_card_2 = models.ImageField(verbose_name="反面身份证")
     device_1 = models.ImageField(verbose_name=u"使用设备－前面")
@@ -125,8 +100,9 @@ class Order(models.Model):
     """
         订单
     """
-    model_user = models.ForeignKey(CommonUser, verbose_name="用户")
-    photographer = models.ForeignKey(Photographer, verbose_name="摄影师")
+    model_user = models.ForeignKey(User, verbose_name="用户", related_name="order_model_user")
+    photographer = models.ForeignKey(User, verbose_name="摄影师", related_name="order_photographer")
+    state = models.IntegerField(default=0, verbose_name="订单状态", )
     type = models.IntegerField(verbose_name="订单类型")
     price = models.FloatField(verbose_name="价格")
     place = models.CharField(max_length=1024, verbose_name=u"地点")
@@ -134,6 +110,8 @@ class Order(models.Model):
     year = models.IntegerField(default=2018, verbose_name=u"年")
     month = models.IntegerField(default=1, verbose_name=u"月")
     day = models.IntegerField(default=1, verbose_name=u"日")
+
+    date = models.DateField(verbose_name="日期")
 
     class Meta:
         verbose_name = u"订单"
@@ -147,7 +125,7 @@ class OrderComment(models.Model):
     score = models.IntegerField(default=5, verbose_name="分数")
     content = models.CharField(max_length=4096)
 
-    #images = models.OneToOneField(Gallery)
+    images = models.ManyToManyField(UploadedImage)
 
 
 class AppConfig(models.Model):

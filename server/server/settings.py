@@ -27,7 +27,7 @@ DEBUG = True
 
 CHECK_TOKEN = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
