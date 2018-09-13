@@ -17,6 +17,8 @@ class TagSerializer(serializers.ModelSerializer):
 class PhotographerSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True, read_only=True)
 
+    password = serializers.CharField(write_only=True)
+
     class Meta:
         model = Photographer
         fields = ('id', 'phone', 'username', 'password', 'gender', "avatar", "qq", "wechat", "money", "in_order_money",
