@@ -21,8 +21,9 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'phone', 'username', 'password', 'gender', "avatar", "qq", "wechat", "money", "in_order_money",
-                  "is_reviewed", "tags", "desc", "home_img", "pay_way", "price", "visit", "album")
+        fields = ('id', 'phone', 'username', 'password', 'gender', "avatar", "qq", "wechat","birthday", "money", "in_order_money",
+                  "album","bank_card", "address","user_type","is_reviewed", "tags", "desc", "home_img", "pay_way", "price",
+                  "order_count", "likes", "visit")
 
 
 class ReviewSerializer(serializers.ModelSerializer):

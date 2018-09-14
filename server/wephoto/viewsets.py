@@ -41,10 +41,11 @@ class UserSet(viewsets.ModelViewSet):
     filter_fields = ('gender', 'pay_way')
 
     def get_queryset(self):
-        queryset = User.objects.all()
+        queryset = User.objects.order_by('-order_count').all()
 
         price_min = self.request.query_params.get("price_min", None)
         price_max = self.request.query_params.get("price_max", None)
+        tags = self.request.query_params.get("tags", None)
 
         if price_min is not None:
             queryset = queryset.filter(price__gte=price_min)
@@ -52,5 +53,18 @@ class UserSet(viewsets.ModelViewSet):
         if price_max is not None:
             queryset = queryset.filter(price__lte=price_max)
 
+        if tags is not None:
+            print(tags, type(tags))
+            itags = [int(i) for i in tags.split("-")]
+            exclude_phones = []
+            for q in queryset:
+                print()
+                t = [i[0] for i in q.tags.values_list()]
+                print(itags, t)
+                if len(list(set(itags).intersection(set(t)))) ==0:
+                    exclude_phones.append(q.phone)
+            print(exclude_phones)
+            for p in exclude_phones:
+                queryset = queryset.exclude(phone=p)
         return queryset
 

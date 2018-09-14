@@ -10,7 +10,7 @@ from server import tokens
 try:
     tags = Tag.objects.count()
     if tags == 0:
-        tags_list = ['时尚', '写真', '少女', '海边', '艺术']
+        tags_list = ['清新', '日系', '少女', '情绪', '校园']
         for t in tags_list:
             o = Tag(content=t)
             o.save()
