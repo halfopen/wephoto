@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'imagekit',
     'wephoto',
     'django_filters',
+    'gunicorn'
 ]
 
 MIDDLEWARE = [

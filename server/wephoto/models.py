@@ -65,6 +65,7 @@ class User(models.Model):
     visit = models.IntegerField(default=0, verbose_name=u"访问量", blank=True)
 
     likes = models.ManyToManyField("self", verbose_name="收藏", blank=True)  # 普通用户才能收藏
+    date = models.DateTimeField(verbose_name=u"最后修改日期", auto_now=True)
 
     class Meta:
         verbose_name = u"用户"
@@ -92,41 +93,71 @@ class Review(models.Model):
 
     is_reviewed = models.IntegerField(default=False, verbose_name="是否审核通过")
     comment = models.CharField(max_length=4096, verbose_name=u"审核意见", default="")
+    date = models.DateTimeField(verbose_name=u"最后修改日期", auto_now=True)
 
     class Meta:
         verbose_name = u"审核记录"
-
-
-class Order(models.Model):
-    """
-        订单
-    """
-    model_user = models.ForeignKey(User, verbose_name="用户", related_name="order_model_user")
-    photographer = models.ForeignKey(User, verbose_name="摄影师", related_name="order_photographer")
-    state = models.IntegerField(default=0, verbose_name="订单状态", )
-    type = models.IntegerField(verbose_name="订单类型")
-    price = models.FloatField(verbose_name="价格")
-    place = models.CharField(max_length=1024, verbose_name=u"地点")
-    place_type = models.IntegerField(default=0, choices=((0, u"室内"), (1, u"户外")))
-    year = models.IntegerField(default=2018, verbose_name=u"年")
-    month = models.IntegerField(default=1, verbose_name=u"月")
-    day = models.IntegerField(default=1, verbose_name=u"日")
-
-    date = models.DateField(verbose_name="日期")
-
-    class Meta:
-        verbose_name = u"订单"
 
 
 class OrderComment(models.Model):
     """
         订单评价
     """
-    order = models.OneToOneField(Order)
     score = models.IntegerField(default=5, verbose_name="分数")
-    content = models.CharField(max_length=4096)
+    content = models.CharField(max_length=4096, default="", blank=True, verbose_name="内容")
+    date = models.DateTimeField(verbose_name=u"最后修改日期", auto_now=True)
 
-    images = models.ManyToManyField(UploadedImage)
+    images = models.ManyToManyField(UploadedImage, blank=True)
+
+    class Meta:
+        verbose_name = u"订单评价"
+
+
+class Order(models.Model):
+    """
+        订单
+    """
+    user = models.ForeignKey(User, verbose_name="用户", related_name="order_model_user_user")
+    photographer = models.ForeignKey(User, verbose_name="摄影师", related_name="order_photographer_photographer")
+    state = models.IntegerField(default=0, verbose_name="订单状态", choices=((0, "新建"), (1, "进行中"), (2, "已完成"), (3, "已取消")))
+    type = models.IntegerField(verbose_name="订单类型", choices=((0, "互免"), (1, "收费")), default=0)
+    price = models.FloatField(verbose_name="价格", default=0.0)
+    place = models.CharField(max_length=1024, verbose_name=u"地点")
+    place_type = models.IntegerField(default=0, choices=((0, u"室内"), (1, u"户外")))
+
+    date = models.DateTimeField(verbose_name=u"最后修改日期", auto_now=True)
+
+    comment = models.OneToOneField(OrderComment, null=True, blank=True)
+
+    class Meta:
+        verbose_name = u"订单"
+
+
+class MomentComment(models.Model):
+    """
+        评论
+    """
+    user = models.ForeignKey(User, verbose_name="用户", related_name="moment_comment_user_user")
+    reply_to = models.ForeignKey(User, blank=True, null=True, default=None, verbose_name="回复的用户", help_text="如果不是对回复的回复，则为空", related_name="moment_comment_reply_user")
+    content = models.CharField(max_length=4096, verbose_name="内容", blank=False)
+    date = models.DateTimeField(verbose_name=u"最后修改日期", auto_now=True)
+
+    class Meta:
+        verbose_name = u"发现的评论"
+
+
+class Moment(models.Model):
+    """
+        一条朋友圈
+    """
+    user = models.ForeignKey(User, verbose_name="用户")
+    date = models.DateTimeField(verbose_name=u"最后修改日期", auto_now=True)
+    content = models.CharField(max_length=4096, verbose_name="内容", blank=False)
+    images = models.ManyToManyField(UploadedImage, blank=True)
+    comments = models.ManyToManyField(MomentComment, blank=True)
+
+    class Meta:
+        verbose_name = u"发现"
 
 
 class AppConfig(models.Model):

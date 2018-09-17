@@ -13,7 +13,7 @@ class ReviewSet(viewsets.ModelViewSet):
     # 使用过滤器
     filter_backends = (DjangoFilterBackend,)
     # 等值
-    filter_fields = ('tag',)
+    filter_fields = ('is_reviewed',)
 
 
 class TagSet(viewsets.ModelViewSet):
@@ -32,8 +32,14 @@ class OrderSet(viewsets.ModelViewSet):
 
 
 class UserSet(viewsets.ModelViewSet):
-    # queryset = Photographer.objects.all()
+    queryset = User.objects.all()
     serializer_class = UserSerializer
+
+
+class UserDetailSet(viewsets.ModelViewSet):
+    http_method_names = ["get"]
+    # queryset = Photographer.objects.all()
+    serializer_class = UserDetailSerializer
 
     # 使用过滤器
     filter_backends = (DjangoFilterBackend,)
@@ -68,3 +74,23 @@ class UserSet(viewsets.ModelViewSet):
                 queryset = queryset.exclude(phone=p)
         return queryset
 
+
+class OrderCommentSet(viewsets.ModelViewSet):
+    serializer_class = OrderComment
+    queryset = OrderComment.objects.all()
+
+
+class MomentSet(viewsets.ModelViewSet):
+    serializer_class = MomentSerializer
+    queryset = Moment.objects.all()
+
+
+class MomentDetailSet(viewsets.ModelViewSet):
+    serializer_class = MomentDetailSerializer
+    http_method_names = ["get"]
+    queryset = Moment.objects.all()
+
+
+class MomentCommentSet(viewsets.ModelViewSet):
+    serializer_class = MomentCommentSerializer
+    queryset = MomentComment.objects.all()

@@ -5,33 +5,46 @@ from wephoto.models import *
 class UploadedImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = UploadedImage
-        fields = ('id', 'file', 'tag')
+        fields = '__all__'
 
 
 class TagSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Tag
-        fields = ('id', 'content', 'count')
+        fields = '__all__'
 
 
 class UserSerializer(serializers.ModelSerializer):
     # tags = TagSerializer(many=True)
 
     password = serializers.CharField(write_only=True)  # 不可查看
+    is_reviewed = serializers.IntegerField(read_only=True) # 没有权限修改
 
     class Meta:
         model = User
-        fields = ('id', 'phone', 'username', 'password', 'gender', "avatar", "qq", "wechat","birthday", "money", "in_order_money",
-                  "album","bank_card", "address","user_type","is_reviewed", "tags", "desc", "home_img", "pay_way", "price",
-                  "order_count", "likes", "visit")
+        fields = '__all__'
+
+
+class UserDetailSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)  # 不可查看
+    is_reviewed = serializers.IntegerField(read_only=True) # 没有权限修改
+
+    class Meta:
+        model = User
+        fields = '__all__'
+        depth = 1
 
 
 class ReviewSerializer(serializers.ModelSerializer):
     # photographer = PhotographerSerializer(read_only=True)
 
+    is_reviewed = serializers.IntegerField(read_only=True)
+    comment = serializers.IntegerField(read_only=True)
+
     class Meta:
         model = Review
-        fields = ('id', 'photographer', 'id_card_1', 'id_card_2', 'device_1', 'device_2', 'device_3', 'is_reviewed', 'comment')
+        fields = '__all__'
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -40,4 +53,34 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ('id', 'photographer', 'model_user', 'type', 'price', 'place', 'place_type', 'year', 'month', 'day')
+        fields = '__all__'
+
+
+class OrderCommentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = OrderComment
+        fields = '__all__'
+
+
+class MomentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Moment
+        fields = '__all__'
+
+
+class MomentDetailSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Moment
+        fields = '__all__'
+        depth = 1
+
+
+class MomentCommentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = MomentComment
+        fields = '__all__'
+

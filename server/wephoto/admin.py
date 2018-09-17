@@ -48,8 +48,8 @@ class UploadedImageAdmin(admin.ModelAdmin):
 
 
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('model_user', 'photographer', 'type', 'price', 'place', 'place_type')
-    list_filter = ('year', 'month', 'day')
+    list_display = ('user', 'photographer', 'type', 'price', 'place', 'place_type')
+    date_hierarchy = 'date'
 
 
 class ReviewAdmin(admin.ModelAdmin):
@@ -62,3 +62,6 @@ admin.site.register(Review)
 admin.site.register(Order, OrderAdmin)
 admin.site.register(Tag)
 admin.site.register(UploadedImage, UploadedImageAdmin)
+admin.site.register(OrderComment)
+admin.site.register(Moment)
+admin.site.register(MomentComment)
