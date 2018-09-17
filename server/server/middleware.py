@@ -16,6 +16,7 @@ class CheckToken(MiddlewareMixin):
     """
     def process_request(self, req):
         print(req.path)
+        print("tokens:", tokens)
         if settings.CHECK_TOKEN and req.path.startswith("/api"):
             print("检查 user-agent")
             user_agent = req.META.get("HTTP_USER_AGENT", None)

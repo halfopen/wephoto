@@ -1,8 +1,10 @@
 # coding: utf-8
-from django.shortcuts import render
+from django.shortcuts import *
 from django.http.response import *
 from wephoto.models import *
+from wephoto.serializers import *
 from django.core.exceptions import *
+
 import hashlib
 from server import tokens
 
@@ -41,19 +43,20 @@ def login(req):
     """
     username = req.GET.get("username", "")
     password = req.GET.get("password", "")
-    user_type = req.GET.get("user_type", 0)
 
-    if True or user_type == 0:
-        user = None
-        try:
-            user = User.objects.get(username=username, password=password)
-            sec_str = str(user.id)+"-"+user.password+settings.SECRET_KEY
-            token = hashlib.sha1(sec_str.encode("utf-8")).hexdigest()
-            tokens[token] = 1
-        except User.DoesNotExist:
-            print("用户名，密码错误")
+    try:
+        user = User.objects.get(username=username, password=password)
+        sec_str = str(user.id)+"-"+user.password+settings.SECRET_KEY
+        token = hashlib.sha1(sec_str.encode("utf-8")).hexdigest()
+        user.token = token
+        user.save()
+        tokens[str(user.id)] = token
+    except User.DoesNotExist:
+        return JsonResponse(BaseJsonResponse("用户名/密码错误", "").error())
+    except:
+        return JsonResponse(BaseJsonResponse("登录失败", "").error())
 
-        return JsonResponse(BaseJsonResponse("ok", user).info())
+    return JsonResponse(BaseJsonResponse("登录成功", {"token":token}).info())
 
 
 def like(req):

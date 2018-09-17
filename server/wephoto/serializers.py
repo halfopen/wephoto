@@ -19,6 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
     # tags = TagSerializer(many=True)
 
     password = serializers.CharField(write_only=True)  # 不可查看
+    token = serializers.CharField(write_only=True)  # 不可查看
     is_reviewed = serializers.IntegerField(read_only=True) # 没有权限修改
 
     class Meta:
@@ -27,6 +28,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
+    token = serializers.CharField(write_only=True)  # 不可查看
     password = serializers.CharField(write_only=True)  # 不可查看
     is_reviewed = serializers.IntegerField(read_only=True) # 没有权限修改
 
@@ -53,13 +55,6 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = '__all__'
-
-
-class OrderCommentSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = OrderComment
         fields = '__all__'
 
 

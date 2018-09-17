@@ -44,9 +44,10 @@ class UserDetailSet(viewsets.ModelViewSet):
     # 使用过滤器
     filter_backends = (DjangoFilterBackend,)
     # 等值
-    filter_fields = ('gender', 'pay_way')
+    filter_fields = ('gender', 'pay_way', 'user_type')
 
     def get_queryset(self):
+        # 取出所有摄影师，按订单数排序
         queryset = User.objects.order_by('-order_count').all()
 
         price_min = self.request.query_params.get("price_min", None)
@@ -74,10 +75,6 @@ class UserDetailSet(viewsets.ModelViewSet):
                 queryset = queryset.exclude(phone=p)
         return queryset
 
-
-class OrderCommentSet(viewsets.ModelViewSet):
-    serializer_class = OrderComment
-    queryset = OrderComment.objects.all()
 
 
 class MomentSet(viewsets.ModelViewSet):
