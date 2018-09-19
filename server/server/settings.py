@@ -33,6 +33,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    'corsheaders',
     'flat_responsive',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -44,12 +45,13 @@ INSTALLED_APPS = [
     'imagekit',
     'wephoto',
     'django_filters',
-    'gunicorn'
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+
     'django.middleware.common.CommonMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -155,3 +157,5 @@ REST_FRAMEWORK = {
     # 配置过滤
     'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',)
 }
+
+CORS_ORIGIN_ALLOW_ALL = True
