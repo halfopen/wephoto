@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 source activate django
 rm db.sqlite3
 python manage.py makemigrations

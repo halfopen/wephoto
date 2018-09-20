@@ -1,9 +1,10 @@
 from django.db import models
 from django.utils.safestring import mark_safe
+from .storage import *
 
 
 class UploadedImage(models.Model):
-    file = models.ImageField(verbose_name="图片")
+    file = models.ImageField(verbose_name="图片", storage=ImageStorage())
     tag = models.CharField(max_length=1024, default="")
 
     def image(self):
@@ -40,7 +41,7 @@ class User(models.Model):
     username = models.CharField(max_length=1024, verbose_name="用户名", null=False, blank=False)
     password = models.CharField(max_length=1024, verbose_name="密码", null=False, blank=False)
     gender = models.IntegerField(default=0, choices=((0, u"男"), (1, u"女")), verbose_name=u"性别")
-    avatar = models.ImageField(upload_to="avatar", blank=True, verbose_name="头像", default="")
+    avatar = models.ImageField(upload_to="avatar", blank=True, verbose_name="头像", default="", storage=ImageStorage())
     token = models.CharField(max_length=4096, default="", blank=True)
 
     qq = models.CharField(max_length=32, null=True, blank=True, verbose_name=u"QQ号", default="")
@@ -60,7 +61,7 @@ class User(models.Model):
                                       choices=((0, u"未提交"), (1, u"审核中"), (2, u"审核通过"), (-1, u"审核未通过")), blank=True)
     tags = models.ManyToManyField(Tag, blank=True, null=True, verbose_name=u"用户标签")
     desc = models.CharField(max_length=4096, verbose_name=u"个人签名", null=True, blank=True, default="")
-    home_img = models.ImageField(verbose_name=u"主页图片",  blank=True)
+    home_img = models.ImageField(verbose_name=u"主页图片",  blank=True, storage=ImageStorage())
     pay_way = models.IntegerField(default=0, verbose_name=u"收费方式", choices=((0, u"互免"), (1, u"收费")), null=False, blank=True)
     price = models.FloatField(default=0.0, verbose_name=u"价格", blank=True)
     visit = models.IntegerField(default=0, verbose_name=u"访问量", blank=True)
@@ -86,11 +87,11 @@ class Review(models.Model):
         审核记录
     """
     photographer = models.OneToOneField(User)
-    id_card_1 = models.ImageField(verbose_name="正面身份证")
-    id_card_2 = models.ImageField(verbose_name="反面身份证")
-    device_1 = models.ImageField(verbose_name=u"使用设备－前面")
-    device_2 = models.ImageField(verbose_name=u"使用设备－后面")
-    device_3 = models.ImageField(verbose_name=u"使用设备－侧面")
+    id_card_1 = models.ImageField(verbose_name="正面身份证", storage=ImageStorage())
+    id_card_2 = models.ImageField(verbose_name="反面身份证", storage=ImageStorage())
+    device_1 = models.ImageField(verbose_name=u"使用设备－前面", storage=ImageStorage())
+    device_2 = models.ImageField(verbose_name=u"使用设备－后面", storage=ImageStorage())
+    device_3 = models.ImageField(verbose_name=u"使用设备－侧面", storage=ImageStorage())
 
     is_reviewed = models.IntegerField(default=1, verbose_name="是否审核通过", choices=( (1, u"审核中"), (2, u"审核通过"), (-1, u"审核未通过")))
     comment = models.CharField(max_length=4096, verbose_name=u"审核意见", default="")
