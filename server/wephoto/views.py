@@ -56,7 +56,7 @@ def login(req):
     except:
         return JsonResponse(BaseJsonResponse("登录失败", "").error())
 
-    return JsonResponse(BaseJsonResponse("登录成功", {"token":token}).info())
+    return JsonResponse(BaseJsonResponse("登录成功", {"token":token, "id":user.id}).info())
 
 
 def like(req):

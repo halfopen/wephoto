@@ -35,14 +35,14 @@ class Tag(models.Model):
 
 class User(models.Model):
     """
-        用户抽象类
+        用户类
     """
     phone = models.CharField(max_length=32, null=False, unique=True, verbose_name=u"手机")
     username = models.CharField(max_length=1024, verbose_name="用户名", null=False, blank=False)
     password = models.CharField(max_length=1024, verbose_name="密码", null=False, blank=False)
     gender = models.IntegerField(default=0, choices=((0, u"男"), (1, u"女")), verbose_name=u"性别")
     avatar = models.ImageField(upload_to="avatar", blank=True, verbose_name="头像", default="", storage=ImageStorage())
-    token = models.CharField(max_length=4096, default="", blank=True)
+    token = models.CharField(max_length=4096, default="_", blank=True, null=True, verbose_name=u"令牌")
 
     qq = models.CharField(max_length=32, null=True, blank=True, verbose_name=u"QQ号", default="")
     wechat = models.CharField(max_length=32, null=True, blank=True, verbose_name=u"微信号", default="")
