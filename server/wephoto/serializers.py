@@ -18,24 +18,26 @@ class TagSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     # tags = TagSerializer(many=True)
 
-    password = serializers.CharField(write_only=True)  # 不可查看
-    token = serializers.CharField(read_only=True)  # 不可查看
+    # password = serializers.CharField(read_only=True)  # 不可查看
+    # token = serializers.CharField(read_only=True)  # 不可查看
     is_reviewed = serializers.IntegerField(read_only=True) # 没有权限修改
     date = serializers.DateTimeField(read_only=True)
 
     class Meta:
         model = User
-        fields = '__all__'
+        # fields = '__all__'
+        exclude = ('token', 'password')
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
-    token = serializers.CharField(write_only=True)  # 不可查看
-    password = serializers.CharField(write_only=True)  # 不可查看
+    # token = serializers.CharField(write_only=True)  # 不可查看
+    # password = serializers.CharField(write_only=True)  # 不可查看
     is_reviewed = serializers.IntegerField(read_only=True) # 没有权限修改
 
     class Meta:
         model = User
-        fields = '__all__'
+        # fields = '__all__'
+        exclude = ('token', 'password')
         depth = 1
 
 
