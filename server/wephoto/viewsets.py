@@ -24,6 +24,9 @@ class TagSet(viewsets.ModelViewSet):
 class UploadedImageSet(viewsets.ModelViewSet):
     queryset = UploadedImage.objects.all()
     serializer_class = UploadedImageSerializer
+    # 使用过滤器
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ("tag", )
 
 
 class OrderSet(viewsets.ModelViewSet):

@@ -24,5 +24,6 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^media/(?P<path>.*)$', serve, {'document_root':settings.MEDIA_ROOT}),
     url(r'^api/', include(wephoto.urls)),
-    url(r'login', login)
+    url(r'login', login),
+    url(r'upload_image', upload_image)
 ]
