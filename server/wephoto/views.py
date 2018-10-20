@@ -75,9 +75,10 @@ def upload_image(req):
         print(req.FILES)
         if not myFile:
             return HttpResponse("no files for upload!")
-
-        destination = open(os.path.join(settings.MEDIA_ROOT,str(time.time())+myFile.name),'wb+')    # 打开特定的文件进行二进制的写操作
+        filename = str(time.time())+myFile.name
+        destination = open(os.path.join(settings.MEDIA_ROOT, filename),'wb+')    # 打开特定的文件进行二进制的写操作
         for chunk in myFile.chunks():      # 分块写入文件
             destination.write(chunk)
         destination.close()
+        UploadedImage(file=filename, tag="").save()
         return HttpResponse("upload over!")
