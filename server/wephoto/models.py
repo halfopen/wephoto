@@ -61,7 +61,7 @@ class User(models.Model):
                                       choices=((0, u"未提交"), (1, u"审核中"), (2, u"审核通过"), (-1, u"审核未通过")), blank=True)
     tags = models.ManyToManyField(Tag, blank=True, null=True, verbose_name=u"用户标签")
     desc = models.CharField(max_length=4096, verbose_name=u"个人签名", null=True, blank=True, default="")
-    home_img = models.ImageField(verbose_name=u"主页图片",  blank=True, storage=ImageStorage())
+    home_img = models.ImageField(upload_to="home_img", verbose_name=u"主页图片",  blank=True, storage=ImageStorage())
     pay_way = models.IntegerField(default=0, verbose_name=u"收费方式", choices=((0, u"互免"), (1, u"收费")), null=False, blank=True)
     price = models.FloatField(default=0.0, verbose_name=u"价格", blank=True)
     visit = models.IntegerField(default=0, verbose_name=u"访问量", blank=True)

@@ -8,6 +8,7 @@ class UploadedImageSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+
 class TagSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -18,7 +19,7 @@ class TagSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     # tags = TagSerializer(many=True)
 
-    # password = serializers.CharField(read_only=True)  # 不可查看
+    password = serializers.CharField(write_only=True)  # 不可查看
     # token = serializers.CharField(read_only=True)  # 不可查看
     is_reviewed = serializers.IntegerField(read_only=True) # 没有权限修改
     date = serializers.DateTimeField(read_only=True)
@@ -26,7 +27,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         # fields = '__all__'
-        exclude = ('token', 'password')
+        exclude = ('token', )
 
 
 class UserDetailSerializer(serializers.ModelSerializer):

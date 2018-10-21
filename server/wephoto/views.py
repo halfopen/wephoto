@@ -7,6 +7,7 @@ from django.core.exceptions import *
 
 import hashlib
 from server import tokens
+from rest_framework.renderers import JSONRenderer
 
 
 try:
@@ -67,12 +68,13 @@ def like(req):
     """
     pass
 
-
+# 上传upload image对象
 def upload_image(req):
-    print(req)
+    # print(req)
     if req.method == "POST":    # 请求方法为POST时，进行处理
         myFile =req.FILES.get("file", None)    # 获取上传的文件，如果没有文件，则默认为None
-        print(req.FILES)
+        tag = req.POST.get("tag", "")
+        # print(req.FILES)
         if not myFile:
             return HttpResponse("no files for upload!")
         filename = str(time.time())+myFile.name
@@ -80,5 +82,60 @@ def upload_image(req):
         for chunk in myFile.chunks():      # 分块写入文件
             destination.write(chunk)
         destination.close()
-        UploadedImage(file=filename, tag="").save()
-        return HttpResponse("upload over!")
+        u = UploadedImage(file=filename, tag=tag)
+        u.save()
+        slz = UploadedImageSerializer(u)
+        print(type(slz.data), slz.data)
+        data = slz.data
+        data['file'] = settings.SERVER_ADDR+data['file']
+        return JsonResponse(data)
+
+# 上传用户头像
+def upload_avatar(req):
+    if req.method == "POST":
+        avatar = req.FILES.get("avatar", None)
+        uid = req.POST.get("id", None)
+        if not avatar:
+            return JsonResponse(BaseJsonResponse("no file for upload", "").error())
+        if not uid:
+            return JsonResponse(BaseJsonResponse("need provide uid", "").error())
+        user = User.objects.get(id=uid)
+        if not user:
+            return JsonResponse(BaseJsonResponse("user do not exist", "").error())
+        filename = str(time.time()) + avatar.name
+        avatar_root = os.path.join(settings.MEDIA_ROOT, "avatar")
+        print(avatar_root)
+        destination = open(os.path.join(avatar_root, filename), 'wb+')
+        for chunk in avatar.chunks():  # 分块写入文件
+            destination.write(chunk)
+        destination.close()
+        user.avatar = "/media/avatar"+filename
+        user.save()
+        return JsonResponse(BaseJsonResponse("upload ok", {"avatar":settings.SERVER_ADDR+"/media/avatar/"+filename}).info())
+
+
+# 上传个人首页图片
+def upload_home_img(req):
+    if req.method == "POST":
+        home_img = req.FILES.get("home_img", None)
+        uid = req.POST.get("id", None)
+        if not home_img:
+            return JsonResponse(BaseJsonResponse("no file for upload", "").error())
+        if not uid:
+            return JsonResponse(BaseJsonResponse("need provide uid", "").error())
+        user = User.objects.get(id=uid)
+        if not user:
+            return JsonResponse(BaseJsonResponse("user do not exist", "").error())
+        filename = str(time.time()) + home_img.name
+        avatar_root = os.path.join(settings.MEDIA_ROOT, "home_img")
+        print(avatar_root)
+        destination = open(os.path.join(avatar_root, filename), 'wb+')
+        for chunk in home_img.chunks():  # 分块写入文件
+            destination.write(chunk)
+        destination.close()
+        user.avatar = "/media/home_img/" + filename
+        user.save()
+        return JsonResponse(
+            BaseJsonResponse("upload ok", {"home_img": settings.SERVER_ADDR + "/media/home_img/" + filename}).info())
+
+
