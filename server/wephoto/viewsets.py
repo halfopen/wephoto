@@ -4,6 +4,7 @@ from .models import *
 from .serializers import *
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet
 from django_filters import *
+from rest_framework import status
 
 
 class ReviewSet(viewsets.ModelViewSet):
@@ -27,6 +28,16 @@ class UploadedImageSet(viewsets.ModelViewSet):
     # 使用过滤器
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ("tag", )
+
+    def create(self, request, *args, **kwargs):
+        print(request.data)
+        serializer = self.get_serializer(data=request.data)
+        print(serializer)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        print(serializer.data)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 class OrderSet(viewsets.ModelViewSet):
