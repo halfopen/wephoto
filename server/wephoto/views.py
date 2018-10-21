@@ -109,7 +109,7 @@ def upload_avatar(req):
         for chunk in avatar.chunks():  # 分块写入文件
             destination.write(chunk)
         destination.close()
-        user.avatar = "/avatar"+filename
+        user.avatar = "/avatar/"+filename
         user.save()
         return JsonResponse(BaseJsonResponse("upload ok", {"avatar":settings.SERVER_ADDR+"/media/avatar/"+filename}).info())
 
