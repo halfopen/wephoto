@@ -133,7 +133,7 @@ def upload_home_img(req):
         for chunk in home_img.chunks():  # 分块写入文件
             destination.write(chunk)
         destination.close()
-        user.avatar = "/media/home_img/" + filename
+        user.home_img = "/media/home_img/" + filename
         user.save()
         return JsonResponse(
             BaseJsonResponse("upload ok", {"home_img": settings.SERVER_ADDR + "/media/home_img/" + filename}).info())
