@@ -40,7 +40,7 @@ class User(models.Model):
     """
     phone = models.CharField(max_length=32, null=False, unique=True, verbose_name=u"手机")
     password = models.CharField(max_length=1024, verbose_name=u"密码", null=False, blank=False)
-
+    name = models.CharField(verbose_name=u"姓名", max_length=1024, null=False, blank=False)
     gender = models.IntegerField(default=0, choices=((0, u"男"), (1, u"女")), verbose_name=u"性别", blank=True, null=True)
 
     avatar = models.ImageField(upload_to=u"avatar", blank=True, verbose_name=u"头像", default=u"", storage=ImageStorage())
@@ -89,7 +89,7 @@ class Review(models.Model):
         审核记录
     """
     photographer = models.OneToOneField(User)
-    name = models.CharField(verbose_name=u"姓名", max_length=1024, null=False, blank=False)
+    name = models.CharField(verbose_name=u"姓名", max_length=1024, null=False, blank=False, default="")
     gender = models.IntegerField(default=0, choices=((0, u"男"), (1, u"女")), verbose_name=u"性别", blank=True, null=True)
     birthday = models.DateField(verbose_name=u"出生年月日",  blank=True,  default=u"1995-01-01", null=True)
     id_card_num = models.CharField(verbose_name=u"身份证号码", blank=True, null=True, default=u"000000000000000000", max_length=18)
