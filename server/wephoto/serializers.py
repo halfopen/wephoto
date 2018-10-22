@@ -84,7 +84,7 @@ class MomentDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Moment
         fields = '__all__'
-        depth = 1
+        depth = 2
 
 
 class MomentCommentSerializer(serializers.ModelSerializer):
