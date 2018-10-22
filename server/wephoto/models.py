@@ -9,7 +9,7 @@ class UploadedImage(models.Model):
     tag = models.CharField(max_length=1024, default="", db_index=True)
 
     def image(self):
-        return '<img style="width:60px; height:60px" src="%s"/>' % self.file
+        return '<img style="width:200px; height:200px" src="%s"/>' % self.file
 
     image.allow_tags = True
 
@@ -103,6 +103,8 @@ class Review(models.Model):
     is_reviewed = models.IntegerField(default=0, verbose_name=u"是否审核通过", choices=((0, u"提交中"), (1, u"审核中"), (2, u"审核通过"), (-1, u"审核未通过")))
     comment = models.CharField(max_length=4096, verbose_name=u"审核意见", default="", blank=True, null=True)
     date = models.DateTimeField(verbose_name=u"最后修改日期", auto_now=True)
+
+
 
     class Meta:
         verbose_name = u"审核记录"
