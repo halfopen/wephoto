@@ -42,11 +42,11 @@ def login(req):
     :param req:
     :return:
     """
-    username = req.GET.get("username", "")
+    phone = req.GET.get("phone", "")
     password = req.GET.get("password", "")
 
     try:
-        user = User.objects.get(username=username, password=password)
+        user = User.objects.get(phone=phone, password=password)
         sec_str = str(user.id)+"-"+user.password+settings.SECRET_KEY
         token = hashlib.sha1(sec_str.encode("utf-8")).hexdigest()
         user.token = token
@@ -67,6 +67,7 @@ def like(req):
     :return:
     """
     pass
+
 
 # 上传upload image对象
 def upload_image(req):
@@ -89,6 +90,7 @@ def upload_image(req):
         data = slz.data
         data['file'] = settings.SERVER_ADDR+data['file']
         return JsonResponse(data)
+
 
 # 上传用户头像
 def upload_avatar(req):
@@ -139,3 +141,6 @@ def upload_home_img(req):
             BaseJsonResponse("upload ok", {"home_img": settings.SERVER_ADDR + "/media/home_img/" + filename}).info())
 
 
+def post_review(req):
+    if req.method == "POST":
+        pass

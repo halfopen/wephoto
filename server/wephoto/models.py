@@ -1,3 +1,4 @@
+# coding=utf-8
 from django.db import models
 from django.utils.safestring import mark_safe
 from .storage import *
@@ -76,7 +77,7 @@ class User(models.Model):
         return '<img style="width:60px; height:60px" src="/media/%s"/>' % self.avatar
 
     avatar_image.allow_tags = True
-    avatar_image.verbose_name = "头像"
+    avatar_image.verbose_name = u"头像"
 
     def __str__(self):
         return self.phone+"-"+self.username
@@ -87,13 +88,13 @@ class Review(models.Model):
         审核记录
     """
     photographer = models.OneToOneField(User)
-    id_card_1 = models.ImageField(verbose_name="正面身份证", storage=ImageStorage())
-    id_card_2 = models.ImageField(verbose_name="反面身份证", storage=ImageStorage())
+    id_card_1 = models.ImageField(verbose_name=u"正面身份证", storage=ImageStorage())
+    id_card_2 = models.ImageField(verbose_name=u"反面身份证", storage=ImageStorage())
     device_1 = models.ImageField(verbose_name=u"使用设备－前面", storage=ImageStorage())
     device_2 = models.ImageField(verbose_name=u"使用设备－后面", storage=ImageStorage())
     device_3 = models.ImageField(verbose_name=u"使用设备－侧面", storage=ImageStorage())
 
-    is_reviewed = models.IntegerField(default=1, verbose_name="是否审核通过", choices=( (1, u"审核中"), (2, u"审核通过"), (-1, u"审核未通过")))
+    is_reviewed = models.IntegerField(default=1, verbose_name=u"是否审核通过", choices=( (1, u"审核中"), (2, u"审核通过"), (-1, u"审核未通过")))
     comment = models.CharField(max_length=4096, verbose_name=u"审核意见", default="")
     date = models.DateTimeField(verbose_name=u"最后修改日期", auto_now=True)
 
@@ -105,11 +106,11 @@ class Order(models.Model):
     """
         订单
     """
-    user = models.ForeignKey(User, verbose_name="用户", related_name="order_model_user_user")
-    photographer = models.ForeignKey(User, verbose_name="摄影师", related_name="order_photographer_photographer")
-    state = models.IntegerField(default=0, verbose_name="订单状态", choices=((0, "新建"), (1, "进行中"), (2, "已完成"), (3, "已取消")))
-    type = models.IntegerField(verbose_name="订单类型", choices=((0, "互免"), (1, "收费")), default=0)
-    price = models.FloatField(verbose_name="价格", default=0.0)
+    user = models.ForeignKey(User, verbose_name=u"用户", related_name="order_model_user_user")
+    photographer = models.ForeignKey(User, verbose_name=u"摄影师", related_name="order_photographer_photographer")
+    state = models.IntegerField(default=0, verbose_name=u"订单状态", choices=((0, u"新建"), (1, u"进行中"), (2, u"已完成"), (3, u"已取消")))
+    type = models.IntegerField(verbose_name=u"订单类型", choices=((0, u"互免"), (1, u"收费")), default=0)
+    price = models.FloatField(verbose_name=u"价格", default=0.0)
     place = models.CharField(max_length=1024, verbose_name=u"地点")
     place_type = models.IntegerField(default=0, choices=((0, u"室内"), (1, u"户外")), verbose_name="地点类型")
 

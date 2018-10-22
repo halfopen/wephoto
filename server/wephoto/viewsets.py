@@ -48,16 +48,17 @@ class OrderSet(viewsets.ModelViewSet):
 
     # 使用过滤器
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('photographer', 'user')
+    filter_fields = ('photographer', 'user', 'state')
 
 
 class OrderDetailSet(viewsets.ModelViewSet):
+    http_method_names = ["get"]
     queryset = Order.objects.all()
     serializer_class = OrderDetailSerializer
 
     # 使用过滤器
     filter_backends = (DjangoFilterBackend,)
-    filter_fields = ('photographer', 'user')
+    filter_fields = ('photographer', 'user', 'state')
 
 
 class UserSet(viewsets.ModelViewSet):
@@ -103,7 +104,6 @@ class UserDetailSet(viewsets.ModelViewSet):
             for p in exclude_phones:
                 queryset = queryset.exclude(phone=p)
         return queryset
-
 
 
 class MomentSet(viewsets.ModelViewSet):
