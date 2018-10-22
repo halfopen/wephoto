@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-source activate django
 rm db.sqlite3
-python manage.py makemigrations
-python manage.py migrate
-python manage.py createsuperuser
+rm wephoto/migrations/0*
+python3 manage.py makemigrations
+python3 manage.py migrate
+python3 manage.py createsuperuser --username h --email ""
+
