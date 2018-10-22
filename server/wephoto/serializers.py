@@ -62,6 +62,16 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class OrderDetailSerializer(serializers.ModelSerializer):
+    # photographer = PhotographerSerializer(read_only=True)
+    # model_user = CommonUserSerializer(read_only=True)
+
+    class Meta:
+        model = Order
+        fields = '__all__'
+        depth = 1
+
+
 class MomentSerializer(serializers.ModelSerializer):
 
     class Meta:

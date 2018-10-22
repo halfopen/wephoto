@@ -51,6 +51,15 @@ class OrderSet(viewsets.ModelViewSet):
     filter_fields = ('photographer', 'user')
 
 
+class OrderDetailSet(viewsets.ModelViewSet):
+    queryset = Order.objects.all()
+    serializer_class = OrderDetailSerializer
+
+    # 使用过滤器
+    filter_backends = (DjangoFilterBackend,)
+    filter_fields = ('photographer', 'user')
+
+
 class UserSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
