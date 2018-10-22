@@ -16,7 +16,7 @@ class ReviewSet(viewsets.ModelViewSet):
     # 使用过滤器
     filter_backends = (DjangoFilterBackend,)
     # 等值
-    filter_fields = ('is_reviewed',)
+    filter_fields = ('is_reviewed', 'photographer')
 
 
 class TagSet(viewsets.ModelViewSet):

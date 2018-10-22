@@ -46,7 +46,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     # photographer = PhotographerSerializer(read_only=True)
 
     is_reviewed = serializers.IntegerField(read_only=True)
-    comment = serializers.IntegerField(read_only=True)
+    comment = serializers.CharField(read_only=True)
 
     class Meta:
         model = Review

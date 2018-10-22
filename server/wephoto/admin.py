@@ -5,7 +5,7 @@ from django.db import models
 from wephoto.models import *
 from django.utils.html import *
 
-admin.site.name = "约拍"
+admin.site.name = u"约拍"
 
 
 class MyImageWidget(ImageWidget):
@@ -30,10 +30,10 @@ class MyImageWidget(ImageWidget):
 
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('phone', 'username', 'avatar_image')
+    list_display = ('phone', 'avatar_image')
     formfield_overrides = {models.ImageField: {'widget': MyImageWidget}}
 
-    readonly_fields = ('作品集', )
+    readonly_fields = (u'作品集', )
 
     list_filter = ('user_type', )
 
