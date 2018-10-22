@@ -83,140 +83,138 @@ def upload_image(req):
         for chunk in myFile.chunks():      # 分块写入文件
             destination.write(chunk)
         destination.close()
-        u = UploadedImage(file=filename, tag=tag)
+        u = UploadedImage(file=settings.SERVER_ADDR+"/media/"+filename, tag=tag)
         u.save()
         slz = UploadedImageSerializer(u)
         print(type(slz.data), slz.data)
         data = slz.data
-        data['file'] = settings.SERVER_ADDR+data['file']
         return JsonResponse(data)
 
 
-def save_file(file, dir):
-    filename = str(time.time()) + file.name
-    root = os.path.join(settings.MEDIA_ROOT, dir)
-    if not os.path.exists(root):
-        os.mkdir(root)
-    destination = open(os.path.join(root, filename), 'wb+')
-    for chunk in file.chunks():  # 分块写入文件
-        destination.write(chunk)
-    destination.close()
-    return filename
+# def save_file(file, dir):
+#     filename = str(time.time()) + file.name
+#     root = os.path.join(settings.MEDIA_ROOT, dir)
+#     if not os.path.exists(root):
+#         os.mkdir(root)
+#     destination = open(os.path.join(root, filename), 'wb+')
+#     for chunk in file.chunks():  # 分块写入文件
+#         destination.write(chunk)
+#     destination.close()
+#     return filename
 
 
-# 上传用户头像
-def upload_avatar(req):
-    if req.method == "POST":
-        avatar = req.FILES.get("avatar", None)
-        uid = req.POST.get("id", None)
-        if not avatar:
-            return JsonResponse(BaseJsonResponse("no file for upload", "").error())
-        if not uid:
-            return JsonResponse(BaseJsonResponse("need provide uid", "").error())
-        user = User.objects.get(id=uid)
-        if not user:
-            return JsonResponse(BaseJsonResponse("user do not exist", "").error())
-        filename = save_file(avatar, "avatar")
-        user.avatar = "/avatar/"+filename
-        user.save()
-        return JsonResponse(BaseJsonResponse("upload ok", {"avatar":settings.SERVER_ADDR+"/media/avatar/"+filename}).info())
+# # 上传用户头像
+# def upload_avatar(req):
+#     if req.method == "POST":
+#         avatar = req.FILES.get("avatar", None)
+#         uid = req.POST.get("id", None)
+#         if not avatar:
+#             return JsonResponse(BaseJsonResponse("no file for upload", "").error())
+#         if not uid:
+#             return JsonResponse(BaseJsonResponse("need provide uid", "").error())
+#         user = User.objects.get(id=uid)
+#         if not user:
+#             return JsonResponse(BaseJsonResponse("user do not exist", "").error())
+#         filename = save_file(avatar, "avatar")
+#         user.avatar = "/avatar/"+filename
+#         user.save()
+#         return JsonResponse(BaseJsonResponse("upload ok", {"avatar":settings.SERVER_ADDR+"/media/avatar/"+filename}).info())
+#
+#
+# # 上传个人首页图片
+# def upload_home_img(req):
+#     if req.method == "POST":
+#         home_img = req.FILES.get("home_img", None)
+#         uid = req.POST.get("id", None)
+#         if not home_img:
+#             return JsonResponse(BaseJsonResponse("no file for upload", "").error())
+#         if not uid:
+#             return JsonResponse(BaseJsonResponse("need provide uid", "").error())
+#         user = User.objects.get(id=uid)
+#         if not user:
+#             return JsonResponse(BaseJsonResponse("user do not exist", "").error())
+#         filename = save_file(home_img, "home_img")
+#         user.home_img = "/home_img/" + filename
+#         user.save()
+#         return JsonResponse(
+#             BaseJsonResponse("upload ok", {"home_img": settings.SERVER_ADDR + "/media/home_img/" + filename}).info())
 
 
-# 上传个人首页图片
-def upload_home_img(req):
-    if req.method == "POST":
-        home_img = req.FILES.get("home_img", None)
-        uid = req.POST.get("id", None)
-        if not home_img:
-            return JsonResponse(BaseJsonResponse("no file for upload", "").error())
-        if not uid:
-            return JsonResponse(BaseJsonResponse("need provide uid", "").error())
-        user = User.objects.get(id=uid)
-        if not user:
-            return JsonResponse(BaseJsonResponse("user do not exist", "").error())
-        filename = save_file(home_img, "home_img")
-        user.home_img = "/home_img/" + filename
-        user.save()
-        return JsonResponse(
-            BaseJsonResponse("upload ok", {"home_img": settings.SERVER_ADDR + "/media/home_img/" + filename}).info())
-
-
-def review(req):
-    """
-        添加一个审核，提交个人资料
-    :param req:
-    :return:
-    """
-    if req.method == "POST":
-        id = req.POST.get("id", None) # 摄影师id
-        name = req.POST.get("name", None)
-        id_card_num = req.POST.get("id_card_num", None)
-        gender = req.POST.get("gender", None)
-        birthday = req.POST.get("birthday", None)
-
-        if not id:
-            return JsonResponse(BaseJsonResponse("need provide id", "").error())
-        p = User.objects.get(id=id)
-        try:
-            r = Review.objects.get(photographer=p)
-        except Review.DoesNotExist:
-            r = Review(photographer=p, is_reviewed=0)
-        r.name = name
-        r.id_card_num = id_card_num
-        r.gender = gender
-        r.birthday = birthday
-        id_card_1 = req.FILES.get("id_card_1", None)
-        id_card_2 = req.FILES.get("id_card_2", None)
-        id_card_1_file = save_file(id_card_1, "id_card")
-        id_card_2_file = save_file(id_card_2, "id_card")
-
-        r.id_card_1 = "/id_card/"+id_card_1_file
-        r.id_card_2 = "/id_card/"+id_card_2_file
-        r.save()
-        return JsonResponse(BaseJsonResponse("ok", "").info())
-
-
-def submit_review_device(req):
-    """
-        提交审核的三张照片
-    :param req:
-    :return:
-    """
-    if req.method == "POST":
-        device_1 = req.FILES.get("device_1", None)
-        device_2 = req.FILES.get("device_2", None)
-        device_3 = req.FILES.get("device_3", None)
-        id = req.POST.get("id", None)
-        if not id:
-            return JsonResponse(BaseJsonResponse("need provide id", "").error())
-        r = Review.objects.get(photographer=id)
-        if not r:
-            return JsonResponse(BaseJsonResponse("review do not exist", "").error())
-
-        device_1_file = save_file(device_1, "device")
-        device_2_file = save_file(device_2, "device")
-        device_3_file = save_file(device_3, "device")
-        r.device_1 = "/device/"+device_1_file
-        r.device_2 = "/device/"+device_2_file
-        r.device_3 = "/device/"+device_3_file
-        r.save()
-        return JsonResponse(BaseJsonResponse("upload ok", "").info())
-
-
-def submit_review(req):
-    """
-        提交审核申请
-    :param req:
-    :return:
-    """
-    if req.method == "POST":
-        id = req.POST.get("id", None)
-        if not id:
-            return JsonResponse(BaseJsonResponse("need provide id", "").error())
-        p = User.objects.get(id=id)
-        r = Review.objects.get(photographer=p)
-        if not r:
-            return JsonResponse(BaseJsonResponse("review do not exist", "").error())
-        r.is_reviewed = 1
-        r.save()
-        return JsonResponse(BaseJsonResponse("ok", "").info())
+# def review(req):
+#     """
+#         添加一个审核，提交个人资料
+#     :param req:
+#     :return:
+#     """
+#     if req.method == "POST":
+#         id = req.POST.get("id", None) # 摄影师id
+#         name = req.POST.get("name", None)
+#         id_card_num = req.POST.get("id_card_num", None)
+#         gender = req.POST.get("gender", None)
+#         birthday = req.POST.get("birthday", None)
+#
+#         if not id:
+#             return JsonResponse(BaseJsonResponse("need provide id", "").error())
+#         p = User.objects.get(id=id)
+#         try:
+#             r = Review.objects.get(photographer=p)
+#         except Review.DoesNotExist:
+#             r = Review(photographer=p, is_reviewed=0)
+#         r.name = name
+#         r.id_card_num = id_card_num
+#         r.gender = gender
+#         r.birthday = birthday
+#         r.save()
+#         return JsonResponse(BaseJsonResponse("ok", "").info())
+#
+#
+# def submit_review_image(req):
+#     """
+#         提交审核的三张照片
+#     :param req:
+#     :return:
+#     """
+#     if req.method == "POST":
+#         device_1 = req.FILES.get("device_1", None)
+#         device_2 = req.FILES.get("device_2", None)
+#         device_3 = req.FILES.get("device_3", None)
+#         id_card_1 = req.FILES.get("id_card_1", None)
+#         id_card_2 = req.FILES.get("id_card_2", None)
+#         id_card_1_file = save_file(id_card_1, "id_card")
+#         id_card_2_file = save_file(id_card_2, "id_card")
+#
+#
+#         id = req.POST.get("id", None)
+#         if not id:
+#             return JsonResponse(BaseJsonResponse("need provide id", "").error())
+#         r = Review.objects.get(photographer=id)
+#         if not r:
+#             return JsonResponse(BaseJsonResponse("review do not exist", "").error())
+#
+#         device_1_file = save_file(device_1, "device")
+#         device_2_file = save_file(device_2, "device")
+#         device_3_file = save_file(device_3, "device")
+#         r.device_1 = "/device/"+device_1_file
+#         r.device_2 = "/device/"+device_2_file
+#         r.device_3 = "/device/"+device_3_file
+#         r.save()
+#         return JsonResponse(BaseJsonResponse("upload ok", "").info())
+#
+#
+# def submit_review(req):
+#     """
+#         提交审核申请
+#     :param req:
+#     :return:
+#     """
+#     if req.method == "POST":
+#         id = req.POST.get("id", None)
+#         if not id:
+#             return JsonResponse(BaseJsonResponse("need provide id", "").error())
+#         p = User.objects.get(id=id)
+#         r = Review.objects.get(photographer=p)
+#         if not r:
+#             return JsonResponse(BaseJsonResponse("review do not exist", "").error())
+#         r.is_reviewed = 1
+#         r.save()
+#         return JsonResponse(BaseJsonResponse("ok", "").info())

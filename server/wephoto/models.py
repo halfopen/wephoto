@@ -5,11 +5,11 @@ from .storage import *
 
 
 class UploadedImage(models.Model):
-    file = models.ImageField(verbose_name="图片", storage=ImageStorage())
-    tag = models.CharField(max_length=1024, default="")
+    file = models.CharField(max_length=2048, verbose_name="地址")
+    tag = models.CharField(max_length=1024, default="", db_index=True)
 
     def image(self):
-        return '<img style="width:60px; height:60px" src="/media/%s"/>' % self.file
+        return '<img style="width:60px; height:60px" src="%s"/>' % self.file
 
     image.allow_tags = True
 
@@ -17,7 +17,7 @@ class UploadedImage(models.Model):
         verbose_name = u"上传的图片"
 
     def __str__(self):
-        return self.file.name + " "+ self.tag
+        return self.file + " " + self.tag
 
 
 class Tag(models.Model):
@@ -43,7 +43,7 @@ class User(models.Model):
     name = models.CharField(verbose_name=u"姓名", max_length=1024, null=False, blank=False)
     gender = models.IntegerField(default=0, choices=((0, u"男"), (1, u"女")), verbose_name=u"性别", blank=True, null=True)
 
-    avatar = models.ImageField(upload_to=u"avatar", blank=True, verbose_name=u"头像", default=u"", storage=ImageStorage())
+    avatar = models.CharField(max_length=2048, blank=True, verbose_name=u"头像", default=u"", null=True)
     token = models.CharField(max_length=4096, default="_", blank=True, null=True, verbose_name=u"令牌")
 
     qq = models.CharField(max_length=32, null=True, blank=True, verbose_name=u"QQ号", default=u"")
@@ -51,7 +51,7 @@ class User(models.Model):
 
     money = models.FloatField(default=0.0, verbose_name=u"余额", blank=True)
     in_order_money = models.FloatField(default=0.0, verbose_name=u"冻结金额", blank=True)
-    album = models.ManyToManyField(UploadedImage, verbose_name=u"相册", blank=True)
+
     bank_card = models.CharField(max_length=1024, verbose_name=u"银行卡", blank=True)
 
     address = models.CharField(default="", max_length=1024, verbose_name=u"所在地区", null=True, blank=True)
@@ -62,7 +62,7 @@ class User(models.Model):
                                       choices=((0, u"未提交"), (1, u"审核中"), (2, u"审核通过"), (-1, u"审核未通过")), blank=True)
     tags = models.ManyToManyField(Tag, blank=True, null=True, verbose_name=u"用户标签")
     desc = models.CharField(max_length=4096, verbose_name=u"个人签名", null=True, blank=True, default=u"")
-    home_img = models.ImageField(upload_to=u"home_img", verbose_name=u"主页图片",  blank=True, storage=ImageStorage())
+    home_img = models.CharField(max_length=2048, verbose_name=u"主页图片",  blank=True)
     pay_way = models.IntegerField(default=0, verbose_name=u"收费方式", choices=((0, u"互免"), (1, u"收费")), null=False, blank=True)
     price = models.FloatField(default=0.0, verbose_name=u"价格", blank=True)
     visit = models.IntegerField(default=0, verbose_name=u"访问量", blank=True)
@@ -75,7 +75,7 @@ class User(models.Model):
         verbose_name = u"用户"
 
     def avatar_image(self):
-        return u'<img style="width:60px; height:60px" src="/media/%s"/>' % self.avatar
+        return u'<img style="width:60px; height:60px" src="%s"/>' % self.avatar
 
     avatar_image.allow_tags = True
     avatar_image.verbose_name = u"头像"
@@ -94,11 +94,11 @@ class Review(models.Model):
     birthday = models.DateField(verbose_name=u"出生年月日",  blank=True,  default=u"1995-01-01", null=True)
     id_card_num = models.CharField(verbose_name=u"身份证号码", blank=True, null=True, default=u"000000000000000000", max_length=18)
 
-    id_card_1 = models.ImageField(verbose_name=u"正面身份证", storage=ImageStorage(), blank=True, null=True)
-    id_card_2 = models.ImageField(verbose_name=u"反面身份证", storage=ImageStorage(), blank=True, null=True)
-    device_1 = models.ImageField(verbose_name=u"使用设备－前面", storage=ImageStorage(), null=True, blank=True)
-    device_2 = models.ImageField(verbose_name=u"使用设备－后面", storage=ImageStorage(), null=True, blank=True)
-    device_3 = models.ImageField(verbose_name=u"使用设备－侧面", storage=ImageStorage(), null=True, blank=True)
+    id_card_1 = models.CharField(verbose_name=u"正面身份证", max_length=2048, blank=True, null=True)
+    id_card_2 = models.CharField(verbose_name=u"反面身份证", max_length=2048, blank=True, null=True)
+    device_1 = models.CharField(verbose_name=u"使用设备－前面", max_length=2048, null=True, blank=True)
+    device_2 = models.CharField(verbose_name=u"使用设备－后面", max_length=2048, null=True, blank=True)
+    device_3 = models.CharField(verbose_name=u"使用设备－侧面", max_length=2048, null=True, blank=True)
 
     is_reviewed = models.IntegerField(default=0, verbose_name=u"是否审核通过", choices=((0, u"提交中"), (1, u"审核中"), (2, u"审核通过"), (-1, u"审核未通过")))
     comment = models.CharField(max_length=4096, verbose_name=u"审核意见", default="", blank=True, null=True)
