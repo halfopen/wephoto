@@ -83,12 +83,12 @@ def upload_image(req):
             newWidth = 800
             newHeight = float(800) / img.size[0] * img.size[1]
             img.thumbnail((newWidth,newHeight),Image.ANTIALIAS)
-        filename = str(time.time())+".png"
+        filename = str(time.time())+".jpeg"
         destination = open(os.path.join(settings.MEDIA_ROOT, filename),'wb+')    # 打开特定的文件进行二进制的写操作
         # for chunk in myFile.chunks():      # 分块写入文件
         #     destination.write(chunk)
         # destination.close()
-        img.save(os.path.join(settings.MEDIA_ROOT, filename), format='PNG')
+        img.save(os.path.join(settings.MEDIA_ROOT, filename), format='JPEG')
         u = UploadedImage(file=settings.SERVER_ADDR+"/media/"+filename, tag=tag)
         u.save()
         slz = UploadedImageSerializer(u)
