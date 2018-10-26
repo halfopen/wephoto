@@ -8,7 +8,7 @@ from django.core.exceptions import *
 import hashlib
 from server import tokens
 from rest_framework.renderers import JSONRenderer
-
+from PIL import Image
 
 try:
     tags = Tag.objects.count()
@@ -78,17 +78,41 @@ def upload_image(req):
         # print(req.FILES)
         if not myFile:
             return HttpResponse("no files for upload!")
-        filename = str(time.time())+"."+myFile.name.split(".")[-1]
+        img = Image.open(myFile)
+        if img.size[0] > 800 or img.size[1] > 600:
+            newWidth = 800
+            newHeight = float(800) / img.size[0] * img.size[1]
+            img.thumbnail((newWidth,newHeight),Image.ANTIALIAS)
+        filename = str(time.time())+".png"
         destination = open(os.path.join(settings.MEDIA_ROOT, filename),'wb+')    # 打开特定的文件进行二进制的写操作
-        for chunk in myFile.chunks():      # 分块写入文件
-            destination.write(chunk)
-        destination.close()
+        # for chunk in myFile.chunks():      # 分块写入文件
+        #     destination.write(chunk)
+        # destination.close()
+        img.save(os.path.join(settings.MEDIA_ROOT, filename), format='PNG')
         u = UploadedImage(file=settings.SERVER_ADDR+"/media/"+filename, tag=tag)
         u.save()
         slz = UploadedImageSerializer(u)
         print(type(slz.data), slz.data)
         data = slz.data
         return JsonResponse(data)
+
+
+def comment_moment(req):
+    if req.method == "POST":
+        user = req.POST.get("user")
+        reply_to = req.POST.get("reply_to")
+        content = req.POST.get("content")
+        moment_id = req.POST.get("moment_id")
+
+        moment = Moment.objects.get(id=moment_id)
+        user = User.objects.get(id=user)
+        moment_comment = MomentComment(user=user, content=content, reply_to=reply_to)
+        moment_comment.save()
+        moment.comments.add(moment_comment)
+        moment.save()
+
+        slz = MomentSerializer(moment)
+        return JsonResponse(slz)
 
 
 # def save_file(file, dir):
