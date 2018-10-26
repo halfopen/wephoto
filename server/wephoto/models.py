@@ -107,6 +107,7 @@ class Review(models.Model):
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
 
         self.photographer.is_reviewed = self.is_reviewed
+        self.photographer.save()
         super().save(force_insert, force_update, using, update_fields)
 
     class Meta:
