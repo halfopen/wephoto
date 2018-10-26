@@ -107,6 +107,12 @@ class Review(models.Model):
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
 
         self.photographer.is_reviewed = self.is_reviewed
+
+        if self.photographer.is_reviewed == 2:
+            self.photographer.user_type = True
+
+        else:
+            self.photographer.user_type = False
         self.photographer.save()
         super().save(force_insert, force_update, using, update_fields)
 
