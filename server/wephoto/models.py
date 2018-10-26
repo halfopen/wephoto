@@ -104,7 +104,10 @@ class Review(models.Model):
     comment = models.CharField(max_length=4096, verbose_name=u"审核意见", default="", blank=True, null=True)
     date = models.DateTimeField(verbose_name=u"最后修改日期", auto_now=True)
 
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
 
+        self.photographer.is_reviewed = self.is_reviewed
+        super().save(force_insert, force_update, using, update_fields)
 
     class Meta:
         verbose_name = u"审核记录"
