@@ -60,6 +60,24 @@ class OrderDetailSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ('photographer', 'user', 'state')
 
+    def get_queryset(self):
+        query_set = Order.objects.all()
+        states = self.request.query_params.get("states", None)
+        print("states", states)
+        if states is not None:
+            excludes = []
+            states_list = [int(i) for i in states.split(",")]
+            for o in query_set:
+                print(o.state, states_list, o.state not in states_list)
+                if o.state not in states_list:
+
+                    excludes.append(o.id)
+            print(excludes)
+            for id in excludes:
+                query_set = query_set.exclude(id=id)
+            return query_set
+        return super().get_queryset()
+
 
 class UserSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
