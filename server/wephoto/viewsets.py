@@ -7,7 +7,7 @@ from .serializers import *
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet
 from django_filters import *
 from rest_framework import status
-
+from django.http import Http404
 
 class ReviewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
@@ -94,12 +94,18 @@ class UserDetailSet(viewsets.ModelViewSet):
     # 等值
     filter_fields = ('gender', 'pay_way', 'user_type')
 
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
     def get_queryset(self):
         # 取出所有摄影师，按订单数排序
         queryset = User.objects.order_by('-order_count').all()
 
         price_min = self.request.query_params.get("price_min", None)
         price_max = self.request.query_params.get("price_max", None)
+        photographer = self.request.query_params.get("photographer", None)
+        # user = self.request.query_params.get("user", None)
+        # states = self.request.query_params.get("states", None)
         tags = self.request.query_params.get("tags", None)
 
         if price_min is not None:
@@ -121,7 +127,47 @@ class UserDetailSet(viewsets.ModelViewSet):
             print(exclude_phones)
             for p in exclude_phones:
                 queryset = queryset.exclude(phone=p)
+
+        # if states is not None and user is not None and photographer is not None:
+        #     excludes = []
+        #     u = User.objects.get(id=user)
+        #     p = User.objects.get(id=user)
+        #     orders = Order.objects.filter(user=u, photographer=p)
+        #     states_list = [int(i) for i in states.split(",")]
+        #     from django.db.models import Q
+        #     for s in states_list:
+        #         orders = orders.filter(~Q(state=s))
+        #     print("合格的order", orders)
+        #     for q in queryset:
+        #         # 如果条件不满足
+        #
+        #         excludes.append(q.id)
+        #
+        #     for e in excludes:
+        #         queryset = queryset.exclude(e)
+
         return queryset
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        print("instance", instance)
+        user = self.request.query_params.get("user", None)
+        states = self.request.query_params.get("states", None)
+        if states is not None and user is not None:
+            u = User.objects.get(id=user)
+            p = User.objects.get(id=user)
+            orders = Order.objects.filter(user=u, photographer=p)
+            print(orders)
+            states_list = [int(i) for i in states.split(",")]
+            from django.db.models import Q
+            has = False
+            for o in orders:
+                if o.state in states_list:
+                    has = True
+            if not has:
+                instance.phone = "支付订金后可查看"
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
 
 class MomentSet(viewsets.ModelViewSet):
