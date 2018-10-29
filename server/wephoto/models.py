@@ -2,6 +2,7 @@
 from django.db import models
 from django.utils.safestring import mark_safe
 from .storage import *
+import django.utils.timezone as timezone
 
 
 class UploadedImage(models.Model):
@@ -124,6 +125,7 @@ class Order(models.Model):
     """
         订单
     """
+
     user = models.ForeignKey(User, verbose_name=u"用户", related_name=u"order_model_user_user")
     photographer = models.ForeignKey(User, verbose_name=u"摄影师", related_name=u"order_photographer_photographer")
     state = models.IntegerField(default=0, verbose_name=u"订单状态", choices=((0, "预约中"), (1, "待付款"), (2, "进行中"),(3, "已确认"), (4, "已完成"), (5, "已取消")))
@@ -133,6 +135,7 @@ class Order(models.Model):
     place_type = models.IntegerField(default=0, choices=((0, u"室内"), (1, u"户外")), verbose_name=u"地点类型")
 
     date = models.DateTimeField(verbose_name=u"最后修改日期", auto_now=True)
+    time = models.DateTimeField(verbose_name="具体拍摄时间", default=timezone.now)
 
     score = models.IntegerField(default=5, verbose_name=u"分数", blank=True)
     content = models.CharField(max_length=4096, default=u"", blank=True, verbose_name=u"评价内容")
