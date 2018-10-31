@@ -156,14 +156,18 @@ class UserDetailSet(viewsets.ModelViewSet):
         if states is not None and user is not None:
             u = User.objects.get(id=user)
             p = User.objects.get(id=user)
+            # 找到共同订单
             orders = Order.objects.filter(user=u, photographer=p)
             print(orders)
             states_list = [int(i) for i in states.split(",")]
             from django.db.models import Q
             has = False
             for o in orders:
+                print(o.state, states_list)
+                # 只要有一个订单的状态满足
                 if o.state in states_list:
                     has = True
+                    break
             if not has:
                 instance.phone = "支付订金后可查看"
         serializer = self.get_serializer(instance)
