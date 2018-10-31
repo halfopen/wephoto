@@ -9,8 +9,9 @@ from django_filters import *
 from rest_framework import status
 from django.http import Http404
 
+
 class ReviewSet(viewsets.ModelViewSet):
-    queryset = Review.objects.all()
+    queryset = Review.objects.order_by("-id").all()
     serializer_class = ReviewSerializer
 
     # 使用过滤器
@@ -20,12 +21,12 @@ class ReviewSet(viewsets.ModelViewSet):
 
 
 class TagSet(viewsets.ModelViewSet):
-    queryset = Tag.objects.all()
+    queryset = Tag.objects.order_by("-id").all()
     serializer_class = TagSerializer
 
 
 class UploadedImageSet(viewsets.ModelViewSet):
-    queryset = UploadedImage.objects.all()
+    queryset = UploadedImage.objects.order_by("-id").all()
     serializer_class = UploadedImageSerializer
     # 使用过滤器
     filter_backends = (DjangoFilterBackend,)
@@ -43,7 +44,7 @@ class UploadedImageSet(viewsets.ModelViewSet):
 
 
 class OrderSet(viewsets.ModelViewSet):
-    queryset = Order.objects.all()
+    queryset = Order.objects.order_by("-id").all()
     serializer_class = OrderSerializer
 
     # 使用过滤器
@@ -61,7 +62,7 @@ class OrderDetailSet(viewsets.ModelViewSet):
     filter_fields = ('photographer', 'user', 'state')
 
     def get_queryset(self):
-        query_set = Order.objects.all()
+        query_set = Order.objects.order_by("-id").all()
         states = self.request.query_params.get("states", None)
         print("states", states)
         if states is not None:
@@ -80,7 +81,7 @@ class OrderDetailSet(viewsets.ModelViewSet):
 
 
 class UserSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
+    queryset = User.objects.order_by("-id").all()
     serializer_class = UserSerializer
 
 
@@ -99,7 +100,7 @@ class UserDetailSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         # 取出所有摄影师，按订单数排序
-        queryset = User.objects.order_by('-order_count').all()
+        queryset = User.objects.order_by('-id').all()
 
         price_min = self.request.query_params.get("price_min", None)
         price_max = self.request.query_params.get("price_max", None)
@@ -176,15 +177,15 @@ class UserDetailSet(viewsets.ModelViewSet):
 
 class MomentSet(viewsets.ModelViewSet):
     serializer_class = MomentSerializer
-    queryset = Moment.objects.all()
+    queryset = Moment.objects.order_by("-id").all()
 
 
 class MomentDetailSet(viewsets.ModelViewSet):
     serializer_class = MomentDetailSerializer
     http_method_names = ["get"]
-    queryset = Moment.objects.all()
+    queryset = Moment.objects.order_by("-id").all()
 
 
 class MomentCommentSet(viewsets.ModelViewSet):
     serializer_class = MomentCommentSerializer
-    queryset = MomentComment.objects.all()
+    queryset = MomentComment.objects.order_by("-id").all()
