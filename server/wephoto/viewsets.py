@@ -155,7 +155,7 @@ class UserDetailSet(viewsets.ModelViewSet):
         states = self.request.query_params.get("states", None)
         if states is not None and user is not None:
             u = User.objects.get(id=user)
-            p = User.objects.get(id=user)
+            p = User.objects.get(id=instance.id)
             # 找到共同订单
             orders = Order.objects.filter(user=u, photographer=p)
             print(orders)
