@@ -128,7 +128,7 @@ class Order(models.Model):
 
     user = models.ForeignKey(User, verbose_name=u"用户", related_name=u"order_model_user_user")
     photographer = models.ForeignKey(User, verbose_name=u"摄影师", related_name=u"order_photographer_photographer")
-    state = models.IntegerField(default=0, verbose_name=u"订单状态", choices=((0, "预约中"), (1, "待付款"), (2, "进行中"),(3, "已确认"), (4, "已完成"), (5, "已取消")))
+    state = models.IntegerField(default=0, verbose_name=u"订单状态", choices=((0, "预约中"), (1, "待付款"), (2, "进行中客户已付定金"),(3, "已确认客户支付全款"),(4, "已完成客户确认完成"), (5, "摄影师确认完成"), (6, "已取消")))
     type = models.IntegerField(verbose_name=u"订单类型", choices=((0, u"互免"), (1, u"收费")), default=0)
     price = models.FloatField(verbose_name=u"价格", default=0.0)
     place = models.CharField(max_length=1024, verbose_name=u"地点")
@@ -137,7 +137,7 @@ class Order(models.Model):
     date = models.DateTimeField(verbose_name=u"最后修改日期", auto_now=True)
     time = models.DateTimeField(verbose_name="具体拍摄时间", default=timezone.now)
 
-    score = models.IntegerField(default=5, verbose_name=u"分数", blank=True)
+    score = models.IntegerField(default=0, verbose_name=u"分数", blank=True)
     content = models.CharField(max_length=4096, default=u"", blank=True, verbose_name=u"评价内容")
 
     images = models.ManyToManyField(UploadedImage, blank=True, verbose_name=u"评论图片")
