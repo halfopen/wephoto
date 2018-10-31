@@ -7,6 +7,7 @@ from wephoto.models import *
 from django.utils.html import *
 
 admin.site.name = u"约拍"
+admin.site.site_header = "约拍后台管理"
 
 
 # class MyImageWidget(ImageWidget):
@@ -52,7 +53,7 @@ class UploadedImageAdmin(admin.ModelAdmin):
 
 
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('user', 'photographer', 'type', 'price', 'place', 'place_type')
+    list_display = ('user', 'photographer', 'state', 'type', 'price', 'place', 'place_type')
     date_hierarchy = 'date'
 
 
