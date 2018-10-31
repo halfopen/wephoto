@@ -54,7 +54,7 @@ class OrderSet(viewsets.ModelViewSet):
 
 class OrderDetailSet(viewsets.ModelViewSet):
     http_method_names = ["get"]
-    queryset = Order.objects.all()
+    queryset = Order.objects.order_by('-id').all()
     serializer_class = OrderDetailSerializer
 
     # 使用过滤器
