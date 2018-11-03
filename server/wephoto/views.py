@@ -94,7 +94,7 @@ def upload_image(req):
         #     destination.write(chunk)
         # destination.close()
         img.save(os.path.join(new_dir, filename), format='JPEG')
-        img.thumbnail((80, 80), Image.ANTIALIAS)
+        img.thumbnail((100, 100), Image.ANTIALIAS)
         img.save(os.path.join(new_dir, "80x80-"+filename), format='JPEG')
         u = UploadedImage(file=settings.SERVER_ADDR+"/media/"+new_date+"/"+filename, tag=tag)
         u.save()
