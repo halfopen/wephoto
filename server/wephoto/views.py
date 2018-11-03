@@ -84,12 +84,19 @@ def upload_image(req):
             newHeight = float(800) / img.size[0] * img.size[1]
             img.thumbnail((newWidth,newHeight),Image.ANTIALIAS)
         filename = str(time.time())+".jpeg"
-        destination = open(os.path.join(settings.MEDIA_ROOT, filename),'wb+')    # 打开特定的文件进行二进制的写操作
+        new_date = time.strftime('%Y-%m-%d',time.localtime(time.time()))
+        new_dir = os.path.join(settings.MEDIA_ROOT, new_date)
+        print(new_dir)
+        if not os.path.exists(new_dir):
+            os.mkdir(new_dir)
+        destination = open(os.path.join(new_dir, filename),'wb+')    # 打开特定的文件进行二进制的写操作
         # for chunk in myFile.chunks():      # 分块写入文件
         #     destination.write(chunk)
         # destination.close()
-        img.save(os.path.join(settings.MEDIA_ROOT, filename), format='JPEG')
-        u = UploadedImage(file=settings.SERVER_ADDR+"/media/"+filename, tag=tag)
+        img.save(os.path.join(new_dir, filename), format='JPEG')
+        img.thumbnail((80, 80), Image.ANTIALIAS)
+        img.save(os.path.join(new_dir, "80x80-"+filename), format='JPEG')
+        u = UploadedImage(file=settings.SERVER_ADDR+"/media/"+new_date+"/"+filename, tag=tag)
         u.save()
         slz = UploadedImageSerializer(u)
         print(type(slz.data), slz.data)
