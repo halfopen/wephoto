@@ -184,6 +184,7 @@ class MomentDetailSet(viewsets.ModelViewSet):
     serializer_class = MomentDetailSerializer
     http_method_names = ["get"]
 
+
     def get_queryset(self):
         query_set = Moment.objects.order_by("-id").all()
         user = self.request.query_params.get("user", None)
@@ -192,7 +193,9 @@ class MomentDetailSet(viewsets.ModelViewSet):
                 u = User.objects.get(id=user)
                 print(u)
                 for q in query_set:
-                    q.is_thumb_up = len(ThumbUp.objects.filter(user=u, moment=q)) == 1
+                    t = ThumbUp.objects.filter(user=u, moment=q)
+                    q.is_thumb_up = len(t) == 1
+                    q.thumb_id = t[0].id
             except User.DoesNotExist:
                 pass
         return query_set
@@ -206,3 +209,6 @@ class MomentCommentSet(viewsets.ModelViewSet):
 class ThumbUpSet(viewsets.ModelViewSet):
     serializer_class = ThumbUpSerializer
     queryset = ThumbUp.objects.order_by("-id").all()
+    filter_backends = (DjangoFilterBackend,)
+    # 等值
+    filter_fields = ('user', 'moment')
