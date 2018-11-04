@@ -52,7 +52,7 @@ class User(models.Model):
 
     money = models.FloatField(default=0.0, verbose_name=u"余额", blank=True)
     in_order_money = models.FloatField(default=0.0, verbose_name=u"冻结金额", blank=True)
-
+    bank = models.CharField(max_length=48, verbose_name=u"开户银行", blank=True, default="")
     bank_card = models.CharField(max_length=1024, verbose_name=u"银行卡", blank=True)
 
     address = models.CharField(default="", max_length=1024, verbose_name=u"所在地区", null=True, blank=True)
