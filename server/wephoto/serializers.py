@@ -83,13 +83,22 @@ class MomentDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Moment
-        fields = '__all__'
+        fields = "__all__"
         depth = 2
+
+
 
 
 class MomentCommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MomentComment
+        fields = '__all__'
+
+
+class ThumbUpSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ThumbUp
         fields = '__all__'
 

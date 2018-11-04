@@ -120,6 +120,9 @@ class Review(models.Model):
     class Meta:
         verbose_name = u"审核记录"
 
+    def __str__(self):
+        return str(self.id)
+
 
 class Order(models.Model):
     """
@@ -168,15 +171,46 @@ class Moment(models.Model):
     content = models.CharField(max_length=4096, verbose_name="内容", blank=False)
     images = models.ManyToManyField(UploadedImage, blank=True)
     comments = models.ManyToManyField(MomentComment, blank=True, verbose_name="相关评论")
+    thumb_ups = models.IntegerField(default=0, verbose_name="点赞数")
+    is_thumb_up = models.BooleanField(default=False, verbose_name="是否被点赞")
 
     class Meta:
         verbose_name = u"发现"
+
+    def __str__(self):
+        return str(self.id)
+
+
+class ThumbUp(models.Model):
+    """
+        点赞记录
+    """
+    user = models.ForeignKey(User, verbose_name="用户")
+    moment = models.ForeignKey(Moment, verbose_name="被点赞的发现")
+
+    def delete(self, using=None, keep_parents=False):
+        r = super().delete(using, keep_parents)
+        moment = self.moment
+        moment.thumb_ups = len(ThumbUp.objects.filter(moment=self.moment))
+        moment.save()
+        return r
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        super().save(force_insert, force_update, using, update_fields)
+        moment = self.moment
+        moment.thumb_ups = len(ThumbUp.objects.filter(moment=self.moment))
+        moment.save()
+
+    class Meta:
+        verbose_name = u"点赞记录"
+        unique_together = (('user', 'moment'), )    # 联合主键
 
 
 class AppConfig(models.Model):
     """
         系统统计
     """
+    server = models.CharField(max_length=1024, verbose_name="服务器地址", default="http://118.25.221.34:8080")
 
     class Meta:
         verbose_name = u"系统设置"
