@@ -87,8 +87,6 @@ class MomentDetailSerializer(serializers.ModelSerializer):
         depth = 2
 
 
-
-
 class MomentCommentSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -102,3 +100,23 @@ class ThumbUpSerializer(serializers.ModelSerializer):
         model = ThumbUp
         fields = '__all__'
 
+
+class AppConfigSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = AppConfig
+        fields = '__all__'
+
+
+class PaymentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Payment
+        fields = '__all__'
+
+
+class WithdrawSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Withdraw
+        fields = '__all__'

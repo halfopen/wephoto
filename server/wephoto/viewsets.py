@@ -32,16 +32,6 @@ class UploadedImageSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     filter_fields = ("tag", )
 
-    def create(self, request, *args, **kwargs):
-        print(request.data)
-        serializer = self.get_serializer(data=request.data)
-        print(serializer)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        print(serializer.data)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
 
 class OrderSet(viewsets.ModelViewSet):
     queryset = Order.objects.order_by("-id").all()
@@ -71,7 +61,6 @@ class OrderDetailSet(viewsets.ModelViewSet):
             for o in query_set:
                 print(o.state, states_list, o.state not in states_list)
                 if o.state not in states_list:
-
                     excludes.append(o.id)
             print(excludes)
             for id in excludes:
@@ -116,42 +105,19 @@ class UserDetailSet(viewsets.ModelViewSet):
             queryset = queryset.filter(price__lte=price_max)
 
         if tags is not None:
-            print(tags, type(tags))
             itags = [int(i) for i in tags.split("-")]
             exclude_phones = []
             for q in queryset:
-                print()
                 t = [i[0] for i in q.tags.values_list()]
-                print(itags, t)
                 if len(list(set(itags).intersection(set(t)))) ==0:
                     exclude_phones.append(q.phone)
-            print(exclude_phones)
             for p in exclude_phones:
                 queryset = queryset.exclude(phone=p)
-
-        # if states is not None and user is not None and photographer is not None:
-        #     excludes = []
-        #     u = User.objects.get(id=user)
-        #     p = User.objects.get(id=user)
-        #     orders = Order.objects.filter(user=u, photographer=p)
-        #     states_list = [int(i) for i in states.split(",")]
-        #     from django.db.models import Q
-        #     for s in states_list:
-        #         orders = orders.filter(~Q(state=s))
-        #     print("合格的order", orders)
-        #     for q in queryset:
-        #         # 如果条件不满足
-        #
-        #         excludes.append(q.id)
-        #
-        #     for e in excludes:
-        #         queryset = queryset.exclude(e)
 
         return queryset
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
-        print("instance", instance)
         user = self.request.query_params.get("user", None)
         states = self.request.query_params.get("states", None)
         if states is not None and user is not None:
@@ -159,9 +125,7 @@ class UserDetailSet(viewsets.ModelViewSet):
             p = User.objects.get(id=instance.id)
             # 找到共同订单
             orders = Order.objects.filter(user=u, photographer=p)
-            print(orders)
             states_list = [int(i) for i in states.split(",")]
-            from django.db.models import Q
             has = False
             for o in orders:
                 print(o.state, states_list)
@@ -184,14 +148,12 @@ class MomentDetailSet(viewsets.ModelViewSet):
     serializer_class = MomentDetailSerializer
     http_method_names = ["get"]
 
-
     def get_queryset(self):
         query_set = Moment.objects.order_by("-id").all()
         user = self.request.query_params.get("user", None)
         if user:
             try:
                 u = User.objects.get(id=user)
-                print(u)
                 for q in query_set:
                     t = ThumbUp.objects.filter(user=u, moment=q)
                     q.is_thumb_up = len(t) == 1
@@ -212,3 +174,23 @@ class ThumbUpSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     # 等值
     filter_fields = ('user', 'moment')
+
+
+class AppConfigSet(viewsets.ModelViewSet):
+    serializer_class = AppConfigSerializer
+    queryset = AppConfig.objects.order_by('-id').all()
+    filter_backends = (DjangoFilterBackend,)
+    # 等值
+    filter_fields = ('in_use', )
+
+
+class PaymentSet(viewsets.ModelViewSet):
+    serializer_class = PaymentSerializer
+    http_method_names = ['get', 'post']
+    queryset = Payment.objects.order_by('-id').all()
+
+
+class WithdrawSet(viewsets.ModelViewSet):
+    serializer_class = WithdrawSerializer
+    http_method_names = ['get', 'post']
+    queryset = Withdraw.objects.order_by('-id').all()

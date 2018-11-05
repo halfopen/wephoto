@@ -3,6 +3,11 @@ from django.db import models
 from django.utils.safestring import mark_safe
 from .storage import *
 import django.utils.timezone as timezone
+from django.http import *
+
+
+class DataCheckError(Exception):
+    pass
 
 
 class UploadedImage(models.Model):
@@ -15,7 +20,7 @@ class UploadedImage(models.Model):
     image.allow_tags = True
 
     class Meta:
-        verbose_name = u"上传的图片"
+        verbose_name = u"4.上传的图片"
 
     def __str__(self):
         return self.file + " " + self.tag
@@ -29,7 +34,7 @@ class Tag(models.Model):
     count = models.IntegerField(default=0, verbose_name=u"使用次数")
 
     class Meta:
-        verbose_name = u"标签"
+        verbose_name = u"5.标签"
 
     def __str__(self):
         return self.content
@@ -73,7 +78,7 @@ class User(models.Model):
     date = models.DateTimeField(verbose_name=u"最后修改日期", auto_now=True)
 
     class Meta:
-        verbose_name = u"用户"
+        verbose_name = u"6.用户"
 
     def avatar_image(self):
         return u'<img style="width:60px; height:60px" src="%s"/>' % self.avatar
@@ -118,7 +123,7 @@ class Review(models.Model):
         super().save(force_insert, force_update, using, update_fields)
 
     class Meta:
-        verbose_name = u"审核记录"
+        verbose_name = u"3.审核记录"
 
     def __str__(self):
         return str(self.id)
@@ -145,8 +150,16 @@ class Order(models.Model):
 
     images = models.ManyToManyField(UploadedImage, blank=True, verbose_name=u"评论图片")
 
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        if self.type == 0:
+            self.price = 0.0
+        super().save(force_insert, force_update, using, update_fields)
+
     class Meta:
-        verbose_name = u"订单"
+        verbose_name = u"7.订单"
+
+    def __str__(self):
+        return str(self.id) + u" - u:" + str(self.user)+" p:"+str(self.photographer)+str(self.price)
 
 
 class MomentComment(models.Model):
@@ -159,7 +172,7 @@ class MomentComment(models.Model):
     date = models.DateTimeField(verbose_name=u"最后修改日期", auto_now=True)
 
     class Meta:
-        verbose_name = u"发现的评论"
+        verbose_name = u"8.发现的评论"
 
 
 class Moment(models.Model):
@@ -175,7 +188,7 @@ class Moment(models.Model):
     is_thumb_up = models.BooleanField(default=False, verbose_name="是否被点赞")
 
     class Meta:
-        verbose_name = u"发现"
+        verbose_name = u"9.发现"
 
     def __str__(self):
         return str(self.id)
@@ -202,8 +215,55 @@ class ThumbUp(models.Model):
         moment.save()
 
     class Meta:
-        verbose_name = u"点赞记录"
+        verbose_name = u"3.点赞记录"
         unique_together = (('user', 'moment'), )    # 联合主键
+
+
+class Payment(models.Model):
+    """
+        用户支付记录
+    """
+    pay_way = models.CharField(verbose_name=u"支付方式", max_length=48, default="支付宝")
+    msg = models.TextField(verbose_name=u"支付信息", default="" )
+    date = models.DateTimeField(verbose_name=u"最后修改日期", auto_now=True)
+    user = models.ForeignKey(User, verbose_name="支付用户")
+    order = models.OneToOneField(Order, verbose_name="支付订单")
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        price = self.order.price
+        if self.user.money > price:
+            self.user.money = self.user.money - price
+            self.user.save()
+            # 修改金额，提醒管理员
+            super().save(force_insert, force_update, using, update_fields)
+        else:
+            raise DataCheckError("支付失败")
+
+    class Meta:
+        verbose_name = u"2.用户支付记录"
+
+
+class Withdraw(models.Model):
+    """
+        提现记录
+    """
+    is_with_draw = models.BooleanField(verbose_name="是否已经处理", choices=((False, u"未处理"), (True, u"已经转帐")),
+                                       default=False, help_text="确认后，后台会给用户扣除帐号金额")
+    money = models.FloatField(verbose_name="提现金额", default=0.0)
+    user = models.ForeignKey(User, verbose_name="提现用户")
+    date = models.DateTimeField(verbose_name=u"上一次操作时间", auto_now=True)
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        # 如果是刚申请体现，短信通知管理员
+        self.money = self.user.money
+        # 如果提现已经处理完成，修改用户金额，并短信通知提现者
+        if self.is_with_draw:
+            self.user.money = 0
+            self.user.save()
+        super().save(force_insert, force_update, using, update_fields)
+
+    class Meta:
+        verbose_name = u"1.提现记录"
 
 
 class AppConfig(models.Model):
@@ -211,6 +271,16 @@ class AppConfig(models.Model):
         系统统计
     """
     server = models.CharField(max_length=1024, verbose_name="服务器地址", default="http://118.25.221.34:8080")
+    alipay = models.CharField(verbose_name=u"后台支付宝帐号", default="88888888", max_length=48)
+    wechat = models.CharField(verbose_name=u"后台微信支付帐号", default='88888888', max_length=48)
+    in_use = models.BooleanField(default=True, verbose_name="是否启用", help_text=u"同时只能有一个生效")
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        if self.in_use:
+            for ac in AppConfig.objects.all():
+                ac.in_use = False
+                ac.save()
+        super().save(force_insert, force_update, using, update_fields)
 
     class Meta:
         verbose_name = u"系统设置"

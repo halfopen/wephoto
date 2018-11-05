@@ -10,6 +10,7 @@ from server import tokens
 from rest_framework.renderers import JSONRenderer
 from PIL import Image
 
+# 初始化tag
 try:
     tags = Tag.objects.count()
     if tags == 0:
@@ -17,6 +18,13 @@ try:
         for t in tags_list:
             o = Tag(content=t)
             o.save()
+except:
+    pass
+
+# 初始化配置
+try:
+    if AppConfig.objects.count() == 0:
+        AppConfig(server="http://118.25.221.34:8080", wechat="88888888", alipay="88888888", in_use=True).save()
 except:
     pass
 
@@ -60,15 +68,6 @@ def login(req):
     return JsonResponse(BaseJsonResponse("登录成功", {"token":token, "id":user.id}).info())
 
 
-def like(req):
-    """
-        收藏
-    :param req:
-    :return:
-    """
-    pass
-
-
 # 上传upload image对象
 def upload_image(req):
     # print(req)
@@ -86,20 +85,14 @@ def upload_image(req):
         filename = str(time.time())+".jpeg"
         new_date = time.strftime('%Y-%m-%d',time.localtime(time.time()))
         new_dir = os.path.join(settings.MEDIA_ROOT, new_date)
-        print(new_dir)
         if not os.path.exists(new_dir):
             os.mkdir(new_dir)
-        destination = open(os.path.join(new_dir, filename),'wb+')    # 打开特定的文件进行二进制的写操作
-        # for chunk in myFile.chunks():      # 分块写入文件
-        #     destination.write(chunk)
-        # destination.close()
         img.save(os.path.join(new_dir, filename), format='JPEG')
         img.thumbnail((100, 100), Image.ANTIALIAS)
         img.save(os.path.join(new_dir, filename.replace(".jpeg", "-100x100.jpeg")), format='JPEG')
         u = UploadedImage(file=settings.SERVER_ADDR+"/media/"+new_date+"/"+filename, tag=tag)
         u.save()
         slz = UploadedImageSerializer(u)
-        print(type(slz.data), slz.data)
         data = slz.data
         return JsonResponse(data)
 
@@ -120,132 +113,3 @@ def comment_moment(req):
 
         slz = MomentSerializer(moment)
         return JsonResponse(slz)
-
-
-# def save_file(file, dir):
-#     filename = str(time.time()) + file.name
-#     root = os.path.join(settings.MEDIA_ROOT, dir)
-#     if not os.path.exists(root):
-#         os.mkdir(root)
-#     destination = open(os.path.join(root, filename), 'wb+')
-#     for chunk in file.chunks():  # 分块写入文件
-#         destination.write(chunk)
-#     destination.close()
-#     return filename
-
-
-# # 上传用户头像
-# def upload_avatar(req):
-#     if req.method == "POST":
-#         avatar = req.FILES.get("avatar", None)
-#         uid = req.POST.get("id", None)
-#         if not avatar:
-#             return JsonResponse(BaseJsonResponse("no file for upload", "").error())
-#         if not uid:
-#             return JsonResponse(BaseJsonResponse("need provide uid", "").error())
-#         user = User.objects.get(id=uid)
-#         if not user:
-#             return JsonResponse(BaseJsonResponse("user do not exist", "").error())
-#         filename = save_file(avatar, "avatar")
-#         user.avatar = "/avatar/"+filename
-#         user.save()
-#         return JsonResponse(BaseJsonResponse("upload ok", {"avatar":settings.SERVER_ADDR+"/media/avatar/"+filename}).info())
-#
-#
-# # 上传个人首页图片
-# def upload_home_img(req):
-#     if req.method == "POST":
-#         home_img = req.FILES.get("home_img", None)
-#         uid = req.POST.get("id", None)
-#         if not home_img:
-#             return JsonResponse(BaseJsonResponse("no file for upload", "").error())
-#         if not uid:
-#             return JsonResponse(BaseJsonResponse("need provide uid", "").error())
-#         user = User.objects.get(id=uid)
-#         if not user:
-#             return JsonResponse(BaseJsonResponse("user do not exist", "").error())
-#         filename = save_file(home_img, "home_img")
-#         user.home_img = "/home_img/" + filename
-#         user.save()
-#         return JsonResponse(
-#             BaseJsonResponse("upload ok", {"home_img": settings.SERVER_ADDR + "/media/home_img/" + filename}).info())
-
-
-# def review(req):
-#     """
-#         添加一个审核，提交个人资料
-#     :param req:
-#     :return:
-#     """
-#     if req.method == "POST":
-#         id = req.POST.get("id", None) # 摄影师id
-#         name = req.POST.get("name", None)
-#         id_card_num = req.POST.get("id_card_num", None)
-#         gender = req.POST.get("gender", None)
-#         birthday = req.POST.get("birthday", None)
-#
-#         if not id:
-#             return JsonResponse(BaseJsonResponse("need provide id", "").error())
-#         p = User.objects.get(id=id)
-#         try:
-#             r = Review.objects.get(photographer=p)
-#         except Review.DoesNotExist:
-#             r = Review(photographer=p, is_reviewed=0)
-#         r.name = name
-#         r.id_card_num = id_card_num
-#         r.gender = gender
-#         r.birthday = birthday
-#         r.save()
-#         return JsonResponse(BaseJsonResponse("ok", "").info())
-#
-#
-# def submit_review_image(req):
-#     """
-#         提交审核的三张照片
-#     :param req:
-#     :return:
-#     """
-#     if req.method == "POST":
-#         device_1 = req.FILES.get("device_1", None)
-#         device_2 = req.FILES.get("device_2", None)
-#         device_3 = req.FILES.get("device_3", None)
-#         id_card_1 = req.FILES.get("id_card_1", None)
-#         id_card_2 = req.FILES.get("id_card_2", None)
-#         id_card_1_file = save_file(id_card_1, "id_card")
-#         id_card_2_file = save_file(id_card_2, "id_card")
-#
-#
-#         id = req.POST.get("id", None)
-#         if not id:
-#             return JsonResponse(BaseJsonResponse("need provide id", "").error())
-#         r = Review.objects.get(photographer=id)
-#         if not r:
-#             return JsonResponse(BaseJsonResponse("review do not exist", "").error())
-#
-#         device_1_file = save_file(device_1, "device")
-#         device_2_file = save_file(device_2, "device")
-#         device_3_file = save_file(device_3, "device")
-#         r.device_1 = "/device/"+device_1_file
-#         r.device_2 = "/device/"+device_2_file
-#         r.device_3 = "/device/"+device_3_file
-#         r.save()
-#         return JsonResponse(BaseJsonResponse("upload ok", "").info())
-#
-#
-# def submit_review(req):
-#     """
-#         提交审核申请
-#     :param req:
-#     :return:
-#     """
-#     if req.method == "POST":
-#         id = req.POST.get("id", None)
-#         if not id:
-#             return JsonResponse(BaseJsonResponse("need provide id", "").error())
-#         p = User.objects.get(id=id)
-#         r = Review.objects.get(photographer=p)
-#         if not r:
-#             return JsonResponse(BaseJsonResponse("review do not exist", "").error())
-#         r.is_reviewed = 1
-#         r.save()
-#         return JsonResponse(BaseJsonResponse("ok", "").info())

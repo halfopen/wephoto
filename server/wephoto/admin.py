@@ -10,53 +10,43 @@ admin.site.name = u"约拍"
 admin.site.site_header = "约拍后台管理"
 
 
-# class MyImageWidget(ImageWidget):
-#     template = '%(input)s<br />%(image)s'
-#
-#     def __init__(self, attrs=None, template=None, width=200, height=200):
-#         if template is not None:
-#             self.template = template
-#         self.width = width
-#         self.height = height
-#         super(ImageWidget, self).__init__(attrs)
-#
-#     def render(self, name, value, attrs=None):
-#         input_html = super(ImageWidget, self).render(name, value, attrs)
-#         image_html = value
-#         if hasattr(value, 'name'):
-#             image_html = '<a href="/media/%s" target="_blank"><img style="width:200px; height:200px" ' \
-#                          'src="/media/%s"/></a>' % (value.name, value.name)
-#         output = self.template % {'input': input_html,
-#                                   'image': image_html}
-#         return mark_safe(output)
-
-
+@admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('phone', 'avatar_image')
+    list_display = ('phone', 'avatar_image', "name", "user_type", "gender")
     # formfield_overrides = {models.ImageField: {'widget': MyImageWidget}}
 
-    readonly_fields = (u'作品集', u"相册")
+    readonly_fields = (u'作品集', u"相册", '用户头像', '主页图片')
+    exclude = ('avatar', 'home_img', )
 
-    list_filter = ('user_type', )
+    list_filter = ('user_type', 'gender')
 
     def 作品集(self, obj):
         return format_html("""<a href='/admin/wephoto/uploadedimage/?q={0}'　target='_blank'>作品集</a>""", str(obj.id)+"-works")
 
     def 相册(self, obj):
-            return format_html("""<a href='/admin/wephoto/uploadedimage/?q={0}'　target='_blank'>相册</a>""", str(obj.id)+"-album")
+        return format_html("""<a href='/admin/wephoto/uploadedimage/?q={0}'　target='_blank'>相册</a>""", str(obj.id)+"-album")
+
+    def 用户头像(self, obj):
+        return format_html(u'<img style="width:200px; height:200px" src="%s"/>' % obj.avatar)
+
+    def 主页图片(self, obj):
+        return format_html(u'<img style="width:200px; height:200px" src="%s"/>' % obj.home_img)
 
 
+@admin.register(UploadedImage)
 class UploadedImageAdmin(admin.ModelAdmin):
     list_display = ('image', 'tag')
     search_fields = ('tag',)
     # formfield_overrides = {models.ImageField: {'widget': MyImageWidget}}
 
 
+@admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = ('user', 'photographer', 'state', 'type', 'price', 'place', 'place_type')
     date_hierarchy = 'date'
 
 
+@admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
     list_display = ('photographer', 'is_reviewed', 'comment')
     list_filter = ('is_reviewed',)
@@ -82,11 +72,72 @@ class ReviewAdmin(admin.ModelAdmin):
     def 审核作品(self, obj):
         return format_html("<a href='/admin/wephoto/uploadedimage/?q={0}'　target='_blank'>审核作品</a>", str(obj.photographer.id)+"-review-works")
 
+    def has_delete_permission(self, request, obj=None):
+        return False
 
-admin.site.register(User, UserAdmin)
-admin.site.register(Review, ReviewAdmin)
-admin.site.register(Order, OrderAdmin)
-admin.site.register(Tag)
-admin.site.register(UploadedImage, UploadedImageAdmin)
-admin.site.register(Moment)
-admin.site.register(MomentComment)
+    def has_add_permission(self, request):
+        return False
+
+
+@admin.register(Moment)
+class MomentAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'content')
+    readonly_fields = ('images_view', )
+    exclude = ('images', )
+    date_hierarchy = 'date'
+
+    def images_view(self, obj):
+
+        html = ""
+        print("qxk", obj.images, type(obj.images), obj.images.all())
+        for i in obj.images.all():
+            html = html+ u'<img style="width:200px; height:200px" src="%s"/>' % i.file
+        return format_html(html)
+    images_view.verbose_name = "图片"
+
+
+@admin.register(Withdraw)
+class WithdrawAdmin(admin.ModelAdmin):
+    readonly_fields = ('id', 'money', 'user', 'date', '用户信息')
+    list_filter = ('is_with_draw', )
+    date_hierarchy = 'date'
+    list_display = ('id', 'user', '用户信息', 'money', 'is_with_draw', 'date',)
+
+    def 用户信息(self, obj):
+        return obj.user.name + " - "+str(obj.user.phone)
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request):
+        return False
+
+
+@admin.register(Payment)
+class PaymentAdmin(admin.ModelAdmin):
+    actions = None
+    readonly_fields = ('id', 'order', 'user', 'pay_way', 'msg', 'date')
+    date_hierarchy = 'date'
+    list_display = ('id', 'order', 'user', 'pay_way', 'msg', 'date')
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request):
+        return False
+
+
+@admin.register(Tag)
+class TagAdmin(admin.ModelAdmin):
+    list_display = ('id', 'content')
+
+
+@admin.register(MomentComment)
+class MomentCommentAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'content', 'reply_to', 'date')
+    date_hierarchy = 'date'
+
+
+@admin.register(AppConfig)
+class AppConfigAdmin(admin.ModelAdmin):
+    list_display = ('id', 'server', 'alipay', 'wechat', 'in_use')
