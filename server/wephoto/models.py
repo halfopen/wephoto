@@ -248,17 +248,18 @@ class Withdraw(models.Model):
         提现记录
     """
     is_with_draw = models.BooleanField(verbose_name="是否已经处理", choices=((False, u"未处理"), (True, u"已经转帐")),
-                                       default=False, help_text="确认后，后台会给用户扣除帐号金额")
+                                       default=False, help_text="确认后，后台会给用户扣除帐号金额,不要重复处理")
     money = models.FloatField(verbose_name="提现金额", default=0.0)
     user = models.ForeignKey(User, verbose_name="提现用户")
     date = models.DateTimeField(verbose_name=u"上一次操作时间", auto_now=True)
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         # 如果是刚申请体现，短信通知管理员
-        self.money = self.user.money
+        assert self.money > self.user.money or self.money < 0
+        assert len(Withdraw.objects.filter(is_with_draw=False, user=self.user)) == 0
         # 如果提现已经处理完成，修改用户金额，并短信通知提现者
         if self.is_with_draw:
-            self.user.money = 0
+            self.user.money = self.user.money - self.money
             self.user.save()
         super().save(force_insert, force_update, using, update_fields)
 

@@ -98,16 +98,22 @@ class MomentAdmin(admin.ModelAdmin):
 
 @admin.register(Withdraw)
 class WithdrawAdmin(admin.ModelAdmin):
-    readonly_fields = ('id', 'money', 'user', 'date', '用户信息')
+    readonly_fields = ('id', 'money', '用户名', '手机', '开户银行', '银行卡号', 'date')
     list_filter = ('is_with_draw', )
     date_hierarchy = 'date'
-    list_display = ('id', 'user', '用户信息', 'money', 'is_with_draw', 'date',)
+    list_display = ('id', 'user', '用户名', '手机', 'money', 'is_with_draw', 'date',)
 
-    def 用户信息(self, obj):
-        return obj.user.name + " - "+str(obj.user.phone)
+    def 手机(self, obj):
+        return str(obj.user.phone)
 
-    def has_delete_permission(self, request, obj=None):
-        return False
+    def 用户名(self, obj):
+        return obj.user.name
+
+    def 开户银行(self, obj):
+        return obj.user.bnak
+
+    def 银行卡号(self, obj):
+        return obj.user.bank_card
 
     def has_add_permission(self, request):
         return False
@@ -119,9 +125,6 @@ class PaymentAdmin(admin.ModelAdmin):
     readonly_fields = ('id', 'order', 'user', 'pay_way', 'msg', 'date')
     date_hierarchy = 'date'
     list_display = ('id', 'order', 'user', 'pay_way', 'msg', 'date')
-
-    def has_delete_permission(self, request, obj=None):
-        return False
 
     def has_add_permission(self, request):
         return False
