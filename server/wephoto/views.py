@@ -127,6 +127,31 @@ def login(req):
     return JsonResponse(BaseJsonResponse("登录成功", {"token":token, "id":user.id}).info())
 
 
+def register(req):
+    """
+        用户注册
+    :param req:
+    :return:
+    """
+    phone = req.GET.get("phone", "")
+    password = req.GET.get("password", "")
+    code = req.GET.get("code", "")
+    try:
+        print("code:", cache.get("wephoto-phone-"+phone), code)
+        if not cache.get("wephoto-phone-"+phone) or int(cache.get("wephoto-phone-"+phone)) != int(code):
+            return JsonResponse(BaseJsonResponse("验证码错误", {}).error())
+        user = User(name=phone, phone=phone, password=password)
+        sec_str = str(user.id)+"-"+user.password+settings.SECRET_KEY
+        token = hashlib.sha1(sec_str.encode("utf-8")).hexdigest()
+        user.token = token
+        user.save()
+        tokens[token] = user.id
+        return JsonResponse(BaseJsonResponse("注册成功", {"token":token, "id":user.id}).info())
+    except:
+        traceback.print_exc()
+        return JsonResponse(BaseJsonResponse("注册失败", "").error())
+
+
 # 上传upload image对象
 def upload_image(req):
     # print(req)
@@ -212,5 +237,5 @@ def send_verify_code(req):
         params = "{\"code\":\""+code+"\"}"
         r = send_sms(__business_id, str(phone), "16mm", "SMS_150173093", params)
         print(r)
-        return JsonResponse(BaseJsonResponse("发送成功", {}).info())
+        return JsonResponse(BaseJsonResponse("发送成功", {"sms_response": r.encode("utf-8")}).info())
     return JsonResponse(BaseJsonResponse("ok", {"ip":ip}).info())

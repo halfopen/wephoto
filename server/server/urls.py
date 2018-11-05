@@ -25,6 +25,7 @@ urlpatterns = [
     url(r'^media/(?P<path>.*)$', serve, {'document_root':settings.MEDIA_ROOT}),
     url(r'^api/', include(wephoto.urls)),
     url(r'^login', login),
+    url(r'^register', register),
     url(r'^upload_image', upload_image),
     url(r'^send_verify_code', send_verify_code),
 
