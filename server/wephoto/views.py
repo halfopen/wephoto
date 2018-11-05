@@ -237,5 +237,5 @@ def send_verify_code(req):
         params = "{\"code\":\""+code+"\"}"
         r = send_sms(__business_id, str(phone), "16mm", "SMS_150173093", params)
         print(r)
-        return JsonResponse(BaseJsonResponse("发送成功", {"sms_response": r.encode("utf-8")}).info())
+        return JsonResponse(BaseJsonResponse("发送成功", {"sms_response": r.decode("utf-8")}).info())
     return JsonResponse(BaseJsonResponse("ok", {"ip":ip}).info())
