@@ -10,6 +10,12 @@ class DataCheckError(Exception):
     pass
 
 
+class BaseModel(models.Model):
+    owner = models.IntegerField(verbose_name="创建者id", default=0, help_text="0表示系统创建")
+    create_date = models.DateTimeField(verbose_name=u"创建日期", auto_now_add=True)
+    date = models.DateTimeField(verbose_name=u"最后修改日期", auto_now=True)
+
+
 class UploadedImage(models.Model):
     file = models.CharField(max_length=2048, verbose_name="地址")
     tag = models.CharField(max_length=1024, default="", db_index=True)
@@ -40,7 +46,7 @@ class Tag(models.Model):
         return self.content
 
 
-class User(models.Model):
+class User(BaseModel):
     """
         用户类
     """
@@ -66,7 +72,7 @@ class User(models.Model):
     user_type = models.BooleanField(verbose_name=u"是否为摄影师", choices=((False, u"普通用户"), (True, u"摄影师")), default=False, blank=True)
     is_reviewed = models.IntegerField(default=0, verbose_name=u"是否审核通过",
                                       choices=((0, u"未提交"), (1, u"审核中"), (2, u"审核通过"), (-1, u"审核未通过")), blank=True)
-    tags = models.ManyToManyField(Tag, blank=True, null=True, verbose_name=u"用户标签")
+    tags = models.ManyToManyField(Tag, blank=True,  verbose_name=u"用户标签", default=None)
     desc = models.CharField(max_length=4096, verbose_name=u"个人签名", null=True, blank=True, default=u"")
     home_img = models.CharField(max_length=2048, verbose_name=u"主页图片",  blank=True)
     pay_way = models.IntegerField(default=0, verbose_name=u"收费方式", choices=((0, u"互免"), (1, u"收费")), null=False, blank=True)
@@ -75,7 +81,7 @@ class User(models.Model):
 
     likes = models.ManyToManyField("self", verbose_name=u"收藏", blank=True)  # 普通用户才能收藏
     available_date = models.TextField(verbose_name=u"可预约时间", blank=True, default="", null=True)
-    date = models.DateTimeField(verbose_name=u"最后修改日期", auto_now=True)
+
 
     class Meta:
         verbose_name = u"6.用户"

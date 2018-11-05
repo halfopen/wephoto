@@ -10,7 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
-import os
+import os, redis
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -160,4 +160,12 @@ REST_FRAMEWORK = {
 
 CORS_ORIGIN_ALLOW_ALL = True
 
-SERVER_ADDR = "http://118.25.221.34:8080"
+SERVER_ADDR = "http://127.0.0.1:8000"
+
+ACCESS_KEY_ID = "LTAIdXwuGi5TovJl"
+
+ACCESS_KEY_SECRET = "SFzI8UxALJ8qwWUY3G0hyw6d5xkP5g"
+
+SMS_TEMPLATE_CODE = "SMS_150173093"
+
+cache = redis.Redis(host="127.0.0.1", port=6379)

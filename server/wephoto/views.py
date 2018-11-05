@@ -59,7 +59,7 @@ def login(req):
         token = hashlib.sha1(sec_str.encode("utf-8")).hexdigest()
         user.token = token
         user.save()
-        tokens[str(user.id)] = token
+        tokens[token] = user.id
     except User.DoesNotExist:
         return JsonResponse(BaseJsonResponse("用户名/密码错误", "").error())
     except:
@@ -113,3 +113,13 @@ def comment_moment(req):
 
         slz = MomentSerializer(moment)
         return JsonResponse(slz)
+
+
+def send_verify_code(req):
+    print(req.META)
+    if req.META.get('HTTP_X_FORWARDED_FOR'):
+        ip = req.META['HTTP_X_FORWARDED_FOR']
+    else:
+        ip = req.META['REMOTE_ADDR']
+    print(ip)
+    return JsonResponse(BaseJsonResponse("ok", {"ip":ip}).info())
