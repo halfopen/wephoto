@@ -188,6 +188,9 @@ class PaymentSet(viewsets.ModelViewSet):
     serializer_class = PaymentSerializer
     http_method_names = ['get', 'post']
     queryset = Payment.objects.order_by('-id').all()
+    filter_backends = (DjangoFilterBackend,)
+    # 等值
+    filter_fields = ('order', 'state')
 
 
 class WithdrawSet(viewsets.ModelViewSet):

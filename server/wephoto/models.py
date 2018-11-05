@@ -228,16 +228,17 @@ class Payment(models.Model):
     date = models.DateTimeField(verbose_name=u"最后修改日期", auto_now=True)
     user = models.ForeignKey(User, verbose_name="支付用户")
     order = models.OneToOneField(Order, verbose_name="支付订单")
+    type = models.IntegerField(verbose_name="支付类型", default=1, choices=( (0, "定金"), (1, "全款")))
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        price = self.order.price
-        if self.user.money > price:
-            self.user.money = self.user.money - price
-            self.user.save()
-            # 修改金额，提醒管理员
-            super().save(force_insert, force_update, using, update_fields)
-        else:
-            raise DataCheckError("支付失败")
+        # 如果是定金
+        if self.type == 0:
+            self.order.state = 2
+        # 如果是全款
+        elif self.type == 1:
+            self.order.state = 3
+        self.order.save()
+        super().save(force_insert, force_update, using, update_fields)
 
     class Meta:
         verbose_name = u"2.用户支付记录"
@@ -256,7 +257,8 @@ class Withdraw(models.Model):
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         # 如果是刚申请体现，短信通知管理员
         assert self.money > self.user.money or self.money < 0
-        assert len(Withdraw.objects.filter(is_with_draw=False, user=self.user)) == 0
+        if len(Withdraw.objects.filter(is_with_draw=False, user=self.user)) == 0:
+            raise DataCheckError("已有申请未处理")
         # 如果提现已经处理完成，修改用户金额，并短信通知提现者
         if self.is_with_draw:
             self.user.money = self.user.money - self.money
