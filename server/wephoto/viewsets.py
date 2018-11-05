@@ -197,3 +197,7 @@ class WithdrawSet(viewsets.ModelViewSet):
     serializer_class = WithdrawSerializer
     http_method_names = ['get', 'post']
     queryset = Withdraw.objects.order_by('-id').all()
+
+    filter_backends = (DjangoFilterBackend,)
+    # 等值
+    filter_fields = ('user', )
