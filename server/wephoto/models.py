@@ -10,12 +10,6 @@ class DataCheckError(Exception):
     pass
 
 
-class BaseModel(models.Model):
-    owner = models.IntegerField(verbose_name="创建者id", default=0, help_text="0表示系统创建")
-    create_date = models.DateTimeField(verbose_name=u"创建日期", auto_now_add=True)
-    date = models.DateTimeField(verbose_name=u"最后修改日期", auto_now=True)
-
-
 class UploadedImage(models.Model):
     file = models.CharField(max_length=2048, verbose_name="地址")
     tag = models.CharField(max_length=1024, default="", db_index=True)
@@ -46,7 +40,7 @@ class Tag(models.Model):
         return self.content
 
 
-class User(BaseModel):
+class User(models.Model):
     """
         用户类
     """
