@@ -107,11 +107,7 @@ def login(req):
     """
     phone = req.GET.get("phone", "")
     password = req.GET.get("password", "")
-    code = req.GET.get("code", "")
     try:
-        print("code:", cache.get("wephoto-phone-"+phone), code)
-        if not cache.get("wephoto-phone-"+phone) or int(cache.get("wephoto-phone-"+phone)) != int(code):
-            return JsonResponse(BaseJsonResponse("验证码错误", {}).error())
         user = User.objects.get(phone=phone, password=password)
         sec_str = str(user.id)+"-"+user.password+settings.SECRET_KEY
         token = hashlib.sha1(sec_str.encode("utf-8")).hexdigest()
