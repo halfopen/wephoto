@@ -7,7 +7,7 @@ from wephoto.models import *
 from django.utils.html import *
 
 admin.site.name = u"约拍"
-admin.site.site_header = "约拍后台管理"
+admin.site.site_header = "16mm约拍后台管理"
 
 
 @admin.register(User)
