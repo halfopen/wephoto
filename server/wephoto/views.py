@@ -9,7 +9,62 @@ import hashlib
 from server import tokens
 from rest_framework.renderers import JSONRenderer
 from PIL import Image
+import random
+import traceback
 
+from aliyunsdkdysmsapi.request.v20170525 import SendSmsRequest
+from aliyunsdkdysmsapi.request.v20170525 import QuerySendDetailsRequest
+from aliyunsdkcore.client import AcsClient
+import uuid
+from aliyunsdkcore.profile import region_provider
+from aliyunsdkcore.http import method_type as MT
+from aliyunsdkcore.http import format_type as FT
+import uuid
+
+__business_id = uuid.uuid1()
+
+# 注意：不要更改
+REGION = "cn-hangzhou"
+PRODUCT_NAME = "Dysmsapi"
+DOMAIN = "dysmsapi.aliyuncs.com"
+
+acs_client = AcsClient(settings.ACCESS_KEY_ID, settings.ACCESS_KEY_SECRET, REGION)
+region_provider.add_endpoint(PRODUCT_NAME, REGION, DOMAIN)
+
+
+def send_sms(business_id, phone_numbers, sign_name, template_code, template_param=None):
+    smsRequest = SendSmsRequest.SendSmsRequest()
+    # 申请的短信模板编码,必填
+    smsRequest.set_TemplateCode(template_code)
+
+    # 短信模板变量参数
+    if template_param is not None:
+        smsRequest.set_TemplateParam(template_param)
+
+    # 设置业务请求流水号，必填。
+    smsRequest.set_OutId(business_id)
+
+    # 短信签名
+    smsRequest.set_SignName(sign_name)
+
+    # 数据提交方式
+    # smsRequest.set_method(MT.POST)
+
+    # 数据提交格式
+    # smsRequest.set_accept_format(FT.JSON)
+
+    # 短信发送的号码列表，必填。
+    smsRequest.set_PhoneNumbers(phone_numbers)
+
+    # 调用短信发送接口，返回json
+    smsResponse = acs_client.do_action_with_exception(smsRequest)
+
+    # TODO 业务处理
+
+    return smsResponse
+
+
+from server.settings import *
 # 初始化tag
 try:
     tags = Tag.objects.count()
@@ -52,8 +107,11 @@ def login(req):
     """
     phone = req.GET.get("phone", "")
     password = req.GET.get("password", "")
-
+    code = req.GET.get("code", "")
     try:
+        print("code:", cache.get("wephoto-phone-"+phone), code)
+        if not cache.get("wephoto-phone-"+phone) or int(cache.get("wephoto-phone-"+phone)) != int(code):
+            return JsonResponse(BaseJsonResponse("验证码错误", {}).error())
         user = User.objects.get(phone=phone, password=password)
         sec_str = str(user.id)+"-"+user.password+settings.SECRET_KEY
         token = hashlib.sha1(sec_str.encode("utf-8")).hexdigest()
@@ -63,6 +121,7 @@ def login(req):
     except User.DoesNotExist:
         return JsonResponse(BaseJsonResponse("用户名/密码错误", "").error())
     except:
+        traceback.print_exc()
         return JsonResponse(BaseJsonResponse("登录失败", "").error())
 
     return JsonResponse(BaseJsonResponse("登录成功", {"token":token, "id":user.id}).info())
@@ -116,10 +175,42 @@ def comment_moment(req):
 
 
 def send_verify_code(req):
-    print(req.META)
+    # print(req.META)
     if req.META.get('HTTP_X_FORWARDED_FOR'):
         ip = req.META['HTTP_X_FORWARDED_FOR']
     else:
         ip = req.META['REMOTE_ADDR']
     print(ip)
+    # 同一个ip, 一分钟最多20次
+    count = cache.get("wephoto-ip-"+ip)
+    print("count ip:"+str(count))
+    if count is None:
+        cache.set("wephoto-ip-"+ip, 1)
+        cache.expire("wephoto-ip-"+ip, 60)
+    elif int(count) >= 20:
+        print(cache.ttl("wephoto-ip-"+ip))
+        return JsonResponse(BaseJsonResponse("please request later", {}).error())
+    else:
+        t = cache.ttl("wephoto-ip-"+ip)
+        print(t)
+        cache.set("wephoto-ip-"+ip, int(count)+1)
+        cache.expire("wephoto-ip-"+ip, t)
+
+    # 同一个手机号 50秒一次
+    if req.method == "POST":
+        phone = req.POST.get("phone", None)
+        if phone is None:
+            return JsonResponse(BaseJsonResponse("please provide phone number", {}).error())
+        if cache.get("wephoto-phone-"+phone) is not None and int(cache.ttl("wephoto-phone-"+phone)> 10):
+            print(cache.get("wephoto-phone-"+phone), cache.ttl("wephoto-phone-"+phone))
+            return JsonResponse(BaseJsonResponse("please request later", {}).error())
+        code = str(random.random()).replace('0.', '')[:5]
+        cache.set("wephoto-phone-"+phone, code)
+        cache.expire("wephoto-phone-"+phone, 300)
+        print(code)
+        # send_sms()
+        params = "{\"code\":\""+code+"\"}"
+        r = send_sms(__business_id, str(phone), "16mm", "SMS_150173093", params)
+        print(r)
+        return JsonResponse(BaseJsonResponse("发送成功", {}).info())
     return JsonResponse(BaseJsonResponse("ok", {"ip":ip}).info())

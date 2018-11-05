@@ -160,7 +160,7 @@ REST_FRAMEWORK = {
 
 CORS_ORIGIN_ALLOW_ALL = True
 
-SERVER_ADDR = "http://127.0.0.1:8000"
+SERVER_ADDR = "http://118.25.221.34:8080"
 
 ACCESS_KEY_ID = "LTAIdXwuGi5TovJl"
 
@@ -169,3 +169,4 @@ ACCESS_KEY_SECRET = "SFzI8UxALJ8qwWUY3G0hyw6d5xkP5g"
 SMS_TEMPLATE_CODE = "SMS_150173093"
 
 cache = redis.Redis(host="127.0.0.1", port=6379)
+cache.flushall()
