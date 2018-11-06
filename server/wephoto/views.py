@@ -20,6 +20,7 @@ from aliyunsdkcore.profile import region_provider
 from aliyunsdkcore.http import method_type as MT
 from aliyunsdkcore.http import format_type as FT
 import uuid
+import oss2
 
 __business_id = uuid.uuid1()
 
@@ -29,6 +30,10 @@ PRODUCT_NAME = "Dysmsapi"
 DOMAIN = "dysmsapi.aliyuncs.com"
 
 acs_client = AcsClient(settings.ACCESS_KEY_ID, settings.ACCESS_KEY_SECRET, REGION)
+auth = oss2.Auth(settings.ACCESS_KEY_ID, settings.ACCESS_KEY_SECRET)
+bucket = oss2.Bucket(auth, 'http://oss-cn-hangzhou.aliyuncs.com', '16mm')
+
+
 region_provider.add_endpoint(PRODUCT_NAME, REGION, DOMAIN)
 
 
@@ -158,19 +163,18 @@ def upload_image(req):
         if not myFile:
             return HttpResponse("no files for upload!")
         img = Image.open(myFile)
+
         if img.size[0] > 800 or img.size[1] > 600:
             newWidth = 800
             newHeight = float(800) / img.size[0] * img.size[1]
             img.thumbnail((newWidth,newHeight),Image.ANTIALIAS)
         filename = str(time.time())+".jpeg"
-        new_date = time.strftime('%Y-%m-%d',time.localtime(time.time()))
-        new_dir = os.path.join(settings.MEDIA_ROOT, new_date)
-        if not os.path.exists(new_dir):
-            os.mkdir(new_dir)
-        img.save(os.path.join(new_dir, filename), format='JPEG')
-        img.thumbnail((100, 100), Image.ANTIALIAS)
-        img.save(os.path.join(new_dir, filename.replace(".jpeg", "-100x100.jpeg")), format='JPEG')
-        u = UploadedImage(file=settings.SERVER_ADDR+"/media/"+new_date+"/"+filename, tag=tag)
+        filepath = os.path.join("/tmp/", filename)
+        img.save(filepath, format='JPEG')
+        bucket.put_object_from_file(filename, filepath)
+        os.remove(filepath)
+
+        u = UploadedImage(file="http://16mm.oss-cn-hangzhou.aliyuncs.com/"+filename, tag=tag)
         u.save()
         slz = UploadedImageSerializer(u)
         data = slz.data
