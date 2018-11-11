@@ -244,13 +244,16 @@ def send_verify_code(req):
 
 
 def notify(req):
-    raw_data = req.read()
-    xml_obj = xmldom.parseString(raw_data.decode("utf-8"))
-    print("raw_data", raw_data, xml_obj)
-    root = xml_obj.documentElement
-    out_trade_no = root.getElementsByTagName("out_trade_no")[0].childNodes[0]
-    total_fee = root.getElementsByTagName("total_fee")[0].childNodes[0]
-    print(out_trade_no, total_fee)
-    print(out_trade_no.nodeValue, total_fee.nodeValue)
+    try:
+        raw_data = req.read()
+        xml_obj = xmldom.parseString(raw_data.decode("utf-8"))
+        print("raw_data", raw_data, xml_obj)
+        root = xml_obj.documentElement
+        out_trade_no = root.getElementsByTagName("out_trade_no")[0].childNodes[0]
+        total_fee = root.getElementsByTagName("total_fee")[0].childNodes[0]
+        print(out_trade_no, total_fee)
+        print(out_trade_no.nodeValue, total_fee.nodeValue)
+    except:
+        pass
     xml_data = "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>"
     return HttpResponse(xml_data, content_type="text/xml")
