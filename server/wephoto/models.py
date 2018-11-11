@@ -221,21 +221,42 @@ class ThumbUp(models.Model):
 
 class Payment(models.Model):
     """
-        用户支付记录
+        用户支付记录， 用户可以多次请求
+
+        支付接口返回：
+        {
+            "appid":"wx316cdc76b22cb345",
+            "noncestr":"9yNQzX3bAJkv8lyt",
+            "package":"Sign=WXPay",
+            "partnerid":"1518622231",
+            "prepayid":"wx112156415238697c3f4d51de1276925071",
+            "timestamp":1541944601,
+            "sign":"3FE8A768E03FAE75842F207EA9359E59"
+        }
     """
-    pay_way = models.CharField(verbose_name=u"支付方式", max_length=48, default="支付宝")
-    msg = models.TextField(verbose_name=u"支付信息", default="" )
+    pay_way = models.IntegerField(verbose_name=u"支付方式", default=0, choices=( (0, "微信"), (1, "支付宝")))
+
     date = models.DateTimeField(verbose_name=u"最后修改日期", auto_now=True)
     user = models.ForeignKey(User, verbose_name="支付用户")
-    order = models.OneToOneField(Order, verbose_name="支付订单")
+    order = models.ForeignKey(Order, verbose_name="支付订单")
     type = models.IntegerField(verbose_name="支付类型", default=1, choices=( (0, "定金"), (1, "全款")))
+    state = models.IntegerField(verbose_name="支付状态", default=0, choices=((0, "支付中"), (1, "支付失败"), (2, "支付成功")))
+    # sign = models.CharField(verbose_name="sign", max_length=1024, default="")
+    # noncestr = models.CharField(verbose_name="noncestr", max_length=1024, default="")
+    # package = models.CharField(verbose_name="package", max_length=1024, default="")
+    # prepayid = models.CharField(verbose_name="prepayid", max_length=1024, default="")
+    # timestamp = models.CharField(verbose_name="timestamp", max_length=1024, default="")
+    # appid = models.CharField(verbose_name="appid", max_length=1024, default="")
+    transaction_id = models.CharField(verbose_name="微信支付订单号", max_length=1024, default="")
+    out_trade_no = models.CharField(verbose_name="商户订单号", max_length=1024, default="")
+    msg = models.TextField(verbose_name=u"支付信息", default="" )
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         # 如果是定金
-        if self.type == 0:
+        if self.type == 0 and self.state == 2:
             self.order.state = 2
         # 如果是全款
-        elif self.type == 1:
+        elif self.type == 1 and self.state == 2:
             self.order.state = 3
         self.order.save()
         super().save(force_insert, force_update, using, update_fields)
