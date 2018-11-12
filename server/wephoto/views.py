@@ -252,14 +252,17 @@ def order_count(req):
     photographer = req.GET.get("photographer", None)
     resp = []
     qs = None
-    if user is not None:
-        u = User.objects.get(id=user)
-        print(u)
-        qs = Order.objects.filter(user=u).values('state').annotate(count=Count('id'))
-    elif photographer is not None:
-        p = User.objects.get(id=photographer)
-        qs = Order.objects.filter(photographer=p).values('state').annotate(count=Count('id'))
-    print(qs)
+    try:
+        if user is not None:
+            u = User.objects.get(id=user)
+            print(u)
+            qs = Order.objects.filter(user=u).values('state').annotate(count=Count('id'))
+        elif photographer is not None:
+            p = User.objects.get(id=photographer)
+            qs = Order.objects.filter(photographer=p).values('state').annotate(count=Count('id'))
+        print(qs)
+    except:
+        logger.debug(traceback.format_exc())
     if qs is not None:
         resp = [q for q in qs]
     return JsonResponse(resp, safe=False)
