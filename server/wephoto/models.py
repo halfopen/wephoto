@@ -5,6 +5,10 @@ from .storage import *
 import django.utils.timezone as timezone
 from django.http import *
 from django.db import transaction
+import traceback
+import logging
+# 生成一个以当前文件名为名字的logger实例
+logger = logging.getLogger(__name__)
 
 
 class DataCheckError(Exception):
@@ -133,6 +137,8 @@ class Order(models.Model):
     """
         订单
     """
+    class Const:
+        FREE_ORDER_PRICE = 50.0
 
     user = models.ForeignKey(User, verbose_name=u"用户", related_name=u"order_model_user_user")
     photographer = models.ForeignKey(User, verbose_name=u"摄影师", related_name=u"order_photographer_photographer")
@@ -152,7 +158,26 @@ class Order(models.Model):
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         if self.type == 0:
-            self.price = 0.0
+            self.price = Order.Const.FREE_ORDER_PRICE
+        # 取消订单
+        if self.state == 6:
+            # 如果有订金已经支付，还给客户
+            try:
+                # 获取这个订单的已经支付的记录
+                payments = Payment.objects.filter(order=self, state=2)
+                total_pay = 0
+                for p in payments:
+                    # 如果有定金
+                    if p.type == 0:
+                        total_pay += Order.Const.FREE_ORDER_PRICE
+                    # 如果是全款
+                    else:
+                        total_pay += p.order.price
+                self.user.money = self.user.money + total_pay
+                self.user.save()
+            except Payment.DoesNotExist:
+                logger.debug(traceback.format_exc())
+
         super().save(force_insert, force_update, using, update_fields)
 
     class Meta:
@@ -241,6 +266,7 @@ class Payment(models.Model):
     order = models.ForeignKey(Order, verbose_name="支付订单")
     type = models.IntegerField(verbose_name="支付类型", default=1, choices=( (0, "定金"), (1, "全款")))
     state = models.IntegerField(verbose_name="支付状态", default=0, choices=((0, "支付中"), (1, "支付失败"), (2, "支付成功")))
+    fee = models.IntegerField(verbose_name="支付金额", default=0)
     # sign = models.CharField(verbose_name="sign", max_length=1024, default="")
     # noncestr = models.CharField(verbose_name="noncestr", max_length=1024, default="")
     # package = models.CharField(verbose_name="package", max_length=1024, default="")
@@ -254,10 +280,10 @@ class Payment(models.Model):
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         # 开启事物
         sid = transaction.savepoint()
-        # 如果是定金
+        # 如果是定金，支付成功后
         if self.type == 0 and self.state == 2:
             self.order.state = 2
-        # 如果是全款
+        # 如果是全款,支付成功后
         elif self.type == 1 and self.state == 2:
             self.order.state = 3
         try:

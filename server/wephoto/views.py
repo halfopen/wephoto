@@ -279,9 +279,10 @@ def notify(req):
         out_trade_no = root.getElementsByTagName("out_trade_no")[0].childNodes[0]
         total_fee = root.getElementsByTagName("total_fee")[0].childNodes[0]
         result_code = root.getElementsByTagName("result_code")[0].childNodes[0]
+        print("result code", result_code.nodeValue, total_fee.nodeValue)
         payment = Payment.objects.get(out_trade_no=out_trade_no.nodeValue)
-        if result_code == "SUCCESS":
-            if float(total_fee.nodeValue) == float(payment.order.price):
+        if result_code.nodeValue == "SUCCESS":
+            if float(total_fee.nodeValue)/100.0 == float(payment.fee):
                 payment.state = 2
             else:
                 payment.msg = "金额不匹配"+str(total_fee.nodeValue)+" "+payment.order.price
@@ -293,6 +294,7 @@ def notify(req):
         print(out_trade_no, total_fee, result_code)
         print(out_trade_no.nodeValue, total_fee.nodeValue, result_code.nodeValue)
     except:
+        traceback.print_exc()
         logger.debug(traceback.format_exc())
     xml_data = "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>"
     return HttpResponse(xml_data, content_type="text/xml")
