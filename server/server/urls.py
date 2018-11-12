@@ -29,6 +29,7 @@ urlpatterns = [
     url(r'^upload_image', upload_image),
     url(r'^send_verify_code', send_verify_code),
     url(r'^notify', notify),
+    url(r'^order_count', order_count)
 
     # url(r'^comment_moment', comment_moment)
     # url(r'^upload_avatar', upload_avatar),

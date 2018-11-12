@@ -22,6 +22,7 @@ from aliyunsdkcore.http import format_type as FT
 import uuid
 import oss2
 import  xml.dom.minidom as xmldom
+from django.db.models.aggregates import Count
 
 import logging
 # 生成一个以当前文件名为名字的logger实例
@@ -244,6 +245,24 @@ def send_verify_code(req):
         print(r)
         return JsonResponse(BaseJsonResponse("发送成功", {"sms_response": r.decode("utf-8")}).info())
     return JsonResponse(BaseJsonResponse("ok", {"ip":ip}).info())
+
+
+def order_count(req):
+    user = req.GET.get("user", None)
+    photographer = req.GET.get("photographer", None)
+    resp = []
+    qs = None
+    if user is not None:
+        u = User.objects.get(id=user)
+        print(u)
+        qs = Order.objects.filter(user=u).values('state').annotate(count=Count('id'))
+    elif photographer is not None:
+        p = User.objects.count(id=photographer)
+        qs = Order.objects.filter(photographer=p).values('state').annotate(count=Count('id'))
+    print(qs)
+    if qs is not None:
+        resp = [q for q in qs]
+    return JsonResponse(resp, safe=False)
 
 
 def notify(req):
