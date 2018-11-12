@@ -160,8 +160,9 @@ class Order(models.Model):
         if self.type == 0:
             self.price = Order.Const.FREE_ORDER_PRICE
         # 取消订单
-        if self.state == 6:
+        if self.state == 6 or self.state == 4:
             # 如果有订金已经支付，还给客户
+            sid = transaction.savepoint()
             try:
                 # 获取这个订单的已经支付的记录
                 payments = Payment.objects.filter(order=self, state=2)
@@ -173,10 +174,19 @@ class Order(models.Model):
                     # 如果是全款
                     else:
                         total_pay += p.order.price
-                self.user.money = self.user.money + total_pay
-                self.user.save()
+                ################### 以下开始转帐 ########################
+                if self.state == 4:
+                    # 订单完成，开始转钱到摄影师
+                    self.photographer.money = self.photographer.money + total_pay
+                    self.photographer.save()
+                else:
+                    self.user.money = self.user.money + total_pay
+                    self.user.save()
             except Payment.DoesNotExist:
                 logger.debug(traceback.format_exc())
+                transaction.savepoint_rollback(sid)
+
+
 
         super().save(force_insert, force_update, using, update_fields)
 
