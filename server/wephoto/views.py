@@ -23,6 +23,9 @@ import uuid
 import oss2
 import  xml.dom.minidom as xmldom
 
+import logging
+# 生成一个以当前文件名为名字的logger实例
+logger = logging.getLogger(__name__)
 
 __business_id = uuid.uuid1()
 
@@ -266,6 +269,6 @@ def notify(req):
         print(out_trade_no, total_fee, result_code)
         print(out_trade_no.nodeValue, total_fee.nodeValue, result_code.nodeValue)
     except:
-        traceback.print_exc()
+        logger.debug(traceback.format_exc())
     xml_data = "<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>"
     return HttpResponse(xml_data, content_type="text/xml")
