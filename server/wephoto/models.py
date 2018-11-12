@@ -1,9 +1,10 @@
 # coding=utf-8
 from django.db import models
-from django.utils.safestring import mark_safe
+# from django.utils.safestring import mark_safe
 from .storage import *
 import django.utils.timezone as timezone
 from django.http import *
+from django.db import transaction
 
 
 class DataCheckError(Exception):
@@ -75,7 +76,6 @@ class User(models.Model):
 
     likes = models.ManyToManyField("self", verbose_name=u"收藏", blank=True)  # 普通用户才能收藏
     available_date = models.TextField(verbose_name=u"可预约时间", blank=True, default="", null=True)
-
 
     class Meta:
         verbose_name = u"6.用户"
@@ -252,14 +252,19 @@ class Payment(models.Model):
     msg = models.TextField(verbose_name=u"支付信息", default="" )
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        # 开启事物
+        sid = transaction.savepoint()
         # 如果是定金
         if self.type == 0 and self.state == 2:
             self.order.state = 2
         # 如果是全款
         elif self.type == 1 and self.state == 2:
             self.order.state = 3
-        self.order.save()
-        super().save(force_insert, force_update, using, update_fields)
+        try:
+            self.order.save()
+            super().save(force_insert, force_update, using, update_fields)
+        except:
+            transaction.savepoint_rollback(sid)
 
     class Meta:
         verbose_name = u"2.用户支付记录"
@@ -281,10 +286,14 @@ class Withdraw(models.Model):
         if len(Withdraw.objects.filter(is_with_draw=False, user=self.user)) == 0:
             raise DataCheckError("已有申请未处理")
         # 如果提现已经处理完成，修改用户金额，并短信通知提现者
-        if self.is_with_draw:
-            self.user.money = self.user.money - self.money
-            self.user.save()
-        super().save(force_insert, force_update, using, update_fields)
+        sid = transaction.savepoint()
+        try:
+            if self.is_with_draw:
+                self.user.money = self.user.money - self.money
+                self.user.save()
+            super().save(force_insert, force_update, using, update_fields)
+        except:
+            transaction.savepoint_rollback(sid)
 
     class Meta:
         verbose_name = u"1.提现记录"
@@ -300,11 +309,15 @@ class AppConfig(models.Model):
     in_use = models.BooleanField(default=True, verbose_name="是否启用", help_text=u"同时只能有一个生效")
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        if self.in_use:
-            for ac in AppConfig.objects.all():
-                ac.in_use = False
-                ac.save()
-        super().save(force_insert, force_update, using, update_fields)
+        sid = transaction.savepoint()
+        try:
+            if self.in_use:
+                for ac in AppConfig.objects.all():
+                    ac.in_use = False
+                    ac.save()
+            super().save(force_insert, force_update, using, update_fields)
+        except:
+            transaction.savepoint_rollback(sid)
 
     class Meta:
         verbose_name = u"系统设置"
