@@ -273,6 +273,8 @@ def notify(req):
         raw_data = req.read()
         xml_obj = xmldom.parseString(raw_data.decode("utf-8"))
         print("raw_data", raw_data, xml_obj)
+        logger.debug(raw_data.decode("utf-8"))
+        logger.debug(str(xml_obj))
         root = xml_obj.documentElement
         out_trade_no = root.getElementsByTagName("out_trade_no")[0].childNodes[0]
         total_fee = root.getElementsByTagName("total_fee")[0].childNodes[0]
