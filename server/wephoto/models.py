@@ -266,7 +266,7 @@ class Payment(models.Model):
     order = models.ForeignKey(Order, verbose_name="支付订单")
     type = models.IntegerField(verbose_name="支付类型", default=1, choices=( (0, "定金"), (1, "全款")))
     state = models.IntegerField(verbose_name="支付状态", default=0, choices=((0, "支付中"), (1, "支付失败"), (2, "支付成功")))
-    fee = models.IntegerField(verbose_name="支付金额", default=0)
+    fee = models.IntegerField(verbose_name="支付金额", default=0.0)
     # sign = models.CharField(verbose_name="sign", max_length=1024, default="")
     # noncestr = models.CharField(verbose_name="noncestr", max_length=1024, default="")
     # package = models.CharField(verbose_name="package", max_length=1024, default="")
