@@ -257,7 +257,7 @@ def order_count(req):
         print(u)
         qs = Order.objects.filter(user=u).values('state').annotate(count=Count('id'))
     elif photographer is not None:
-        p = User.objects.count(id=photographer)
+        p = User.objects.get(id=photographer)
         qs = Order.objects.filter(photographer=p).values('state').annotate(count=Count('id'))
     print(qs)
     if qs is not None:
