@@ -184,7 +184,7 @@ class Order(models.Model):
         verbose_name = u"7.订单"
 
     def __str__(self):
-        return str(self.id) + u" - u:" + str(self.user)+" p:"+str(self.photographer)+str(self.price)
+        return str(self.id) + u" - user:" + str(self.user)+" photographer:"+str(self.photographer)+" price:"+str(self.price)
 
 
 class MomentComment(models.Model):
