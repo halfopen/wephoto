@@ -282,13 +282,11 @@ def notify(req):
         print("result code", result_code.nodeValue, total_fee.nodeValue)
         payment = Payment.objects.get(out_trade_no=out_trade_no.nodeValue)
         if result_code.nodeValue == "SUCCESS":
-            if float(total_fee.nodeValue)/100.0 == float(payment.fee):
-                payment.state = 2
-            else:
-                payment.msg = "金额不匹配"+str(total_fee.nodeValue)+" "+payment.order.price
-                payment.state = 1
+            payment.state = 2
+            payment.fee = float(total_fee.nodeValue)/100.0
         else:
             payment.msg = "支付订单失败"
+            payment.state = 1
         payment.save()
 
         print(out_trade_no, total_fee, result_code)

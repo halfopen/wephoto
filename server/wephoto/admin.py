@@ -122,9 +122,9 @@ class WithdrawAdmin(admin.ModelAdmin):
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
     actions = None
-    readonly_fields = ('id', 'order', 'user', 'pay_way', 'msg', 'date')
+    readonly_fields = ('id', 'order', 'user', 'pay_way', 'msg', 'fee', 'date')
     date_hierarchy = 'date'
-    list_display = ('id', 'order', 'user', 'pay_way', 'msg', 'date')
+    list_display = ('id', 'order', 'user', 'pay_way', 'msg', 'fee', 'date')
 
     def has_add_permission(self, request):
         return False
