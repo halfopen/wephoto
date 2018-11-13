@@ -318,9 +318,9 @@ class Withdraw(models.Model):
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         # 如果是刚申请体现，短信通知管理员
-        assert self.money > self.user.money or self.money < 0
-        if len(Withdraw.objects.filter(is_with_draw=False, user=self.user)) == 0:
-            raise DataCheckError("已有申请未处理")
+        logger.debug(self.money)
+        logger.debug(self.user.money)
+        assert float(self.money) <= float(self.user.money) or self.money > 0
         # 如果提现已经处理完成，修改用户金额，并短信通知提现者
         sid = transaction.savepoint()
         try:
