@@ -166,27 +166,30 @@ class Order(models.Model):
             try:
                 # 获取这个订单的已经支付的记录
                 payments = Payment.objects.filter(order=self, state=2)
-                total_pay = 0
+                fee = 0.0
+                pay = 0.0
                 for p in payments:
                     # 如果有定金
                     if p.type == 0:
-                        total_pay += Order.Const.FREE_ORDER_PRICE
+                        fee += p.fee
                     # 如果是全款
                     else:
-                        total_pay += p.order.price
+                        pay += p.fee
                 ################### 以下开始转帐 ########################
+                logger.debug("转帐开始")
+                logger.debug("fee "+str(fee))
+                logger.debug("pay "+str(pay))
                 if self.state == 4:
                     # 订单完成，开始转钱到摄影师
-                    self.photographer.money = self.photographer.money + total_pay
+                    logger.debug("订单完成，开始转钱到摄影师")
+                    self.photographer.money = self.photographer.money + pay
                     self.photographer.save()
-                else:
-                    self.user.money = self.user.money + total_pay
-                    self.user.save()
+
+                self.user.money = self.user.money + fee
+                self.user.save()
             except Payment.DoesNotExist:
                 logger.debug(traceback.format_exc())
                 transaction.savepoint_rollback(sid)
-
-
 
         super().save(force_insert, force_update, using, update_fields)
 
@@ -300,6 +303,7 @@ class Payment(models.Model):
             self.order.save()
             super().save(force_insert, force_update, using, update_fields)
         except:
+            logger.debug(traceback.format_exc())
             transaction.savepoint_rollback(sid)
 
     class Meta:

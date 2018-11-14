@@ -44,6 +44,7 @@ class UploadedImageAdmin(admin.ModelAdmin):
 class OrderAdmin(admin.ModelAdmin):
     list_display = ('user', 'photographer', 'state', 'type', 'price', 'place', 'place_type')
     date_hierarchy = 'date'
+    exclude = ('price', )
 
 
 @admin.register(Review)
