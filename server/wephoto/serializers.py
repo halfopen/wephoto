@@ -109,7 +109,7 @@ class AppConfigSerializer(serializers.ModelSerializer):
 
 
 class PaymentSerializer(serializers.ModelSerializer):
-
+    state = serializers.IntegerField(read_only=True)
     class Meta:
         model = Payment
         fields = '__all__'

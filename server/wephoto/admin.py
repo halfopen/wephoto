@@ -12,7 +12,7 @@ admin.site.site_header = "16mm约拍后台管理"
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('phone', 'avatar_image', "name", "user_type", "gender")
+    list_display = ('phone', 'avatar_image', "name", "user_type", "gender", "money")
     # formfield_overrides = {models.ImageField: {'widget': MyImageWidget}}
 
     readonly_fields = (u'作品集', u"相册", '用户头像', '主页图片')
@@ -123,7 +123,7 @@ class WithdrawAdmin(admin.ModelAdmin):
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
     actions = None
-    readonly_fields = ('id', 'order', 'user', 'pay_way', 'type', 'msg', 'fee', 'state', 'date')
+    readonly_fields = ('id', 'order', 'user', 'pay_way', 'type', 'msg', 'fee', 'date')
     date_hierarchy = 'date'
     list_display = ('id', 'order', 'user', 'pay_way', 'type', 'msg', 'fee', 'state', 'date')
     list_filter = ('pay_way', 'type', 'state')
