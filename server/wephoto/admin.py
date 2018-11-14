@@ -102,7 +102,7 @@ class WithdrawAdmin(admin.ModelAdmin):
     readonly_fields = ('id', 'money', '用户名', '手机', '开户银行', '银行卡号', 'date')
     list_filter = ('is_with_draw', )
     date_hierarchy = 'date'
-    list_display = ('id', 'user', '用户名', '手机', 'money', 'is_with_draw', 'date',)
+    list_display = ('id', 'user', '用户名', '手机', 'money', 'msg', 'is_with_draw', 'date',)
 
     def 手机(self, obj):
         return str(obj.user.phone)
@@ -125,8 +125,9 @@ class PaymentAdmin(admin.ModelAdmin):
     actions = None
     readonly_fields = ('id', 'order', 'user', 'pay_way', 'type', 'msg', 'fee', 'date')
     date_hierarchy = 'date'
-    list_display = ('id', 'order', 'user', 'pay_way', 'type', 'msg', 'fee', 'state', 'date')
+    list_display = ('id', 'out_trade_no', 'order', 'user', 'pay_way', 'type', 'msg', 'fee', 'state', 'date')
     list_filter = ('pay_way', 'type', 'state')
+    search_fields = ("out_trade_no", )
 
     def has_add_permission(self, request):
         return False

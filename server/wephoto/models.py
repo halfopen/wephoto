@@ -170,11 +170,13 @@ class Order(models.Model):
                     payments = Payment.objects.filter(order=self, state=2)
                     fee = 0.0
                     pay = 0.0
+                    msg = ""
                     for p in payments:
                         # 如果有定金
                         print(p, p.type, p.fee, p.state)
                         if p.type == 0:
                             fee += p.fee
+                            msg += "退定金,订单号：["+p.out_trade_no+"]"
                         # 如果是全款
                         else:
                             pay += p.fee
@@ -191,7 +193,10 @@ class Order(models.Model):
 
                     self.user.money = self.user.money + fee
                     self.user.save()
-                    Withdraw(user=self.user, money=fee).save()
+                    if fee > 0.0:
+                        Withdraw(user=self.user, money=fee, msg=msg).save()
+                else:
+                    print("订单已经完成")
             except:
                 logger.debug(traceback.format_exc())
                 transaction.savepoint_rollback(sid)
@@ -323,6 +328,7 @@ class Withdraw(models.Model):
                                        default=False, help_text="确认后，后台会给用户扣除帐号金额,不要重复处理")
     money = models.FloatField(verbose_name="提现金额", default=0.0)
     user = models.ForeignKey(User, verbose_name="提现用户")
+    msg = models.CharField(verbose_name="提现信息", default="", max_length=1024)
     date = models.DateTimeField(verbose_name=u"上一次操作时间", auto_now=True)
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
