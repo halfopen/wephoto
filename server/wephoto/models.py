@@ -164,31 +164,34 @@ class Order(models.Model):
             # 如果有订金已经支付，还给客户
             sid = transaction.savepoint()
             try:
-                # 获取这个订单的已经支付的记录
-                payments = Payment.objects.filter(order=self, state=2)
-                fee = 0.0
-                pay = 0.0
-                for p in payments:
-                    # 如果有定金
-                    print(p, p.type, p.fee, p.state)
-                    if p.type == 0:
-                        fee += p.fee
-                    # 如果是全款
-                    else:
-                        pay += p.fee
-                ################### 以下开始转帐 ########################
-                logger.debug("start -----------------------")
-                logger.debug("fee "+str(fee))
-                logger.debug("pay "+str(pay))
-                print(fee, pay)
-                if self.state == 4:
-                    # 订单完成，开始转钱到摄影师
-                    logger.debug("to p")
-                    self.photographer.money = self.photographer.money + pay
-                    self.photographer.save()
+                old_order = Order.objects.get(id = self.id)
+                if old_order.state != 6 and  old_order.state != 4:
+                    # 获取这个订单的已经支付的记录
+                    payments = Payment.objects.filter(order=self, state=2)
+                    fee = 0.0
+                    pay = 0.0
+                    for p in payments:
+                        # 如果有定金
+                        print(p, p.type, p.fee, p.state)
+                        if p.type == 0:
+                            fee += p.fee
+                        # 如果是全款
+                        else:
+                            pay += p.fee
+                    ################### 以下开始转帐 ########################
+                    logger.debug("start -----------------------")
+                    logger.debug("fee "+str(fee))
+                    logger.debug("pay "+str(pay))
+                    print(fee, pay)
+                    if self.state == 4:
+                        # 订单完成，开始转钱到摄影师
+                        logger.debug("to p")
+                        self.photographer.money = self.photographer.money + pay
+                        self.photographer.save()
 
-                self.user.money = self.user.money + fee
-                self.user.save()
+                    self.user.money = self.user.money + fee
+                    self.user.save()
+                    Withdraw(user=self.user, money=fee).save()
             except:
                 logger.debug(traceback.format_exc())
                 transaction.savepoint_rollback(sid)
