@@ -42,7 +42,7 @@ class UploadedImageAdmin(admin.ModelAdmin):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('user', 'photographer', 'state', 'type', 'price', 'place', 'place_type')
+    list_display = ('user', 'photographer', 'state', 'type', 'place', 'place_type')
     date_hierarchy = 'date'
     exclude = ('price', )
 
@@ -126,6 +126,7 @@ class PaymentAdmin(admin.ModelAdmin):
     readonly_fields = ('id', 'order', 'user', 'pay_way', 'type', 'msg', 'fee', 'state', 'date')
     date_hierarchy = 'date'
     list_display = ('id', 'order', 'user', 'pay_way', 'type', 'msg', 'fee', 'state', 'date')
+    list_filter = ('pay_way', 'type', 'state')
 
     def has_add_permission(self, request):
         return False
