@@ -156,10 +156,17 @@ class MomentDetailSet(viewsets.ModelViewSet):
                 u = User.objects.get(id=user)
                 for q in query_set:
                     t = ThumbUp.objects.filter(user=u, moment=q)
-                    q.is_thumb_up = len(t) == 1
-                    q.thumb_id = t[0].id
+                    if len(t) == 1:
+                        q.is_thumb_up = True
+                        q.thumb_id = t[0].id
+                    else:
+                        q.is_thumb_up = False
+                        q.thumb_id = 0
+
             except User.DoesNotExist:
-                pass
+                logger.debug(traceback.format_exc())
+            except:
+                logger.debug(traceback.format_exc())
         return query_set
 
 

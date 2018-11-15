@@ -234,6 +234,7 @@ class Moment(models.Model):
     comments = models.ManyToManyField(MomentComment, blank=True, verbose_name="相关评论")
     thumb_ups = models.IntegerField(default=0, verbose_name="点赞数")
     is_thumb_up = models.BooleanField(default=False, verbose_name="是否被点赞")
+    thumb_id = models.IntegerField(verbose_name="点赞记录的id", default=0)
 
     class Meta:
         verbose_name = u"9.发现"
