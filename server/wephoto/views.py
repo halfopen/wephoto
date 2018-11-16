@@ -173,7 +173,7 @@ def upload_image(req):
         filename = str(time.time())+file_ext
         filepath = os.path.join("/tmp/", filename)
         with open(filepath, "wb") as f:
-            for t in myFile.trunks():
+            for t in myFile.chunks():
                 f.write(t)
         bucket.put_object_from_file(filename, filepath)
         os.remove(filepath)
