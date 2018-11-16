@@ -23,6 +23,7 @@ import uuid
 import oss2
 import  xml.dom.minidom as xmldom
 from django.db.models.aggregates import Count
+import os
 
 import logging
 # 生成一个以当前文件名为名字的logger实例
@@ -168,15 +169,12 @@ def upload_image(req):
         # print(req.FILES)
         if not myFile:
             return HttpResponse("no files for upload!")
-        img = Image.open(myFile)
-
-        # if img.size[0] > 800 or img.size[1] > 600:
-        #     newWidth = 800
-        #     newHeight = float(800) / img.size[0] * img.size[1]
-        #     img.thumbnail((newWidth,newHeight),Image.ANTIALIAS)
-        filename = str(time.time())+".jpeg"
+        file_ext = os.path.splitext(myFile.name)[1]
+        filename = str(time.time())+file_ext
         filepath = os.path.join("/tmp/", filename)
-        img.save(filepath)
+        with open(filepath, "wb") as f:
+            for t in myFile.trunks():
+                f.write(t)
         bucket.put_object_from_file(filename, filepath)
         os.remove(filepath)
 
