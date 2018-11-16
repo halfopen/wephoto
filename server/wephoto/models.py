@@ -113,6 +113,7 @@ class Review(models.Model):
     is_reviewed = models.IntegerField(default=0, verbose_name=u"是否审核通过", choices=((0, u"提交中"), (1, u"审核中"), (2, u"审核通过"), (-1, u"审核未通过")))
     comment = models.CharField(max_length=4096, verbose_name=u"审核意见", default="", blank=True, null=True)
     date = models.DateTimeField(verbose_name=u"最后修改日期", auto_now=True)
+    read_flag = models.IntegerField(verbose_name="用户阅读状态", default=0, choices=((0, "用户未读"), (1, "用户已读")))
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
 
