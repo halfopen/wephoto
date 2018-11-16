@@ -125,6 +125,13 @@ class Review(models.Model):
         else:
             self.photographer.user_type = False
         self.photographer.save()
+        # 更新review未读状态
+        try:
+            r = Review.objects.get(id=self.id)
+            if r.is_reviewed != self.is_reviewed:
+                self.read_flag = 0
+        except:
+            logger.debug(traceback.format_exc())
         super().save(force_insert, force_update, using, update_fields)
 
     class Meta:
