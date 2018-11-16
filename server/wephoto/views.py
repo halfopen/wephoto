@@ -170,13 +170,13 @@ def upload_image(req):
             return HttpResponse("no files for upload!")
         img = Image.open(myFile)
 
-        if img.size[0] > 800 or img.size[1] > 600:
-            newWidth = 800
-            newHeight = float(800) / img.size[0] * img.size[1]
-            img.thumbnail((newWidth,newHeight),Image.ANTIALIAS)
+        # if img.size[0] > 800 or img.size[1] > 600:
+        #     newWidth = 800
+        #     newHeight = float(800) / img.size[0] * img.size[1]
+        #     img.thumbnail((newWidth,newHeight),Image.ANTIALIAS)
         filename = str(time.time())+".jpeg"
         filepath = os.path.join("/tmp/", filename)
-        img.save(filepath, format='JPEG')
+        img.save(filepath)
         bucket.put_object_from_file(filename, filepath)
         os.remove(filepath)
 
