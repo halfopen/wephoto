@@ -24,7 +24,7 @@ class ReviewSet(viewsets.ModelViewSet):
         partial = kwargs.pop('partial', False)
 
         instance = self.get_object()
-        if partial:
+        if partial and request.data.get("read_flag") is None:
             instance.is_reviewed = 1
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
