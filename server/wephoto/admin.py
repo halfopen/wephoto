@@ -73,12 +73,6 @@ class ReviewAdmin(admin.ModelAdmin):
     def 审核作品(self, obj):
         return format_html("<a href='/admin/wephoto/uploadedimage/?q={0}'　target='_blank'>审核作品</a>", str(obj.photographer.id)+"-review-works")
 
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-    def has_add_permission(self, request):
-        return False
-
 
 @admin.register(Moment)
 class MomentAdmin(admin.ModelAdmin):
@@ -116,9 +110,6 @@ class WithdrawAdmin(admin.ModelAdmin):
     def 银行卡号(self, obj):
         return obj.user.bank_card
 
-    def has_add_permission(self, request):
-        return False
-
 
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
@@ -128,9 +119,6 @@ class PaymentAdmin(admin.ModelAdmin):
     list_display = ('id', 'out_trade_no', 'order', 'user', 'pay_way', 'type', 'msg', 'fee', 'state', 'date')
     list_filter = ('pay_way', 'type', 'state')
     search_fields = ("out_trade_no", )
-
-    def has_add_permission(self, request):
-        return False
 
 
 @admin.register(Tag)
