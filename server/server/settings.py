@@ -172,7 +172,7 @@ cache = redis.Redis(host="127.0.0.1", port=6379)
 cache.flushall()
 
 
-BASE_LOG_DIR = os.path.join(BASE_DIR, "log")
+BASE_LOG_DIR = os.path.join(BASE_DIR, "logs")
 LOGGING = {
     'version': 1,  # 保留字
     'disable_existing_loggers': False,  # 禁用已经存在的logger实例

@@ -7,6 +7,13 @@ from django.http import *
 from django.db import transaction
 import traceback
 import logging
+from wephoto.filter import DFAFilter
+import os
+
+dfa_filter = DFAFilter()
+dfa_filter.parse(os.path.join(settings.BASE_DIR, "wephoto/keywords"))
+print(dfa_filter.filter("草你妈 习近平", "*"))
+
 # 生成一个以当前文件名为名字的logger实例
 logger = logging.getLogger(__name__)
 
@@ -80,6 +87,9 @@ class User(models.Model):
 
     likes = models.ManyToManyField("self", verbose_name=u"收藏", blank=True)  # 普通用户才能收藏
     available_date = models.TextField(verbose_name=u"可预约时间", blank=True, default="", null=True)
+
+    # 是否在黑名单
+    is_blocked = models.BooleanField(default=False, verbose_name="是否被禁用")
 
     class Meta:
         verbose_name = u"6.用户"
@@ -165,6 +175,7 @@ class Order(models.Model):
     images = models.ManyToManyField(UploadedImage, blank=True, verbose_name=u"评论图片")
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        self.content = dfa_filter.filter(self.content, "*")
         if self.type == 0:
             self.price = Order.Const.FREE_ORDER_PRICE
         # 取消订单
@@ -230,6 +241,10 @@ class MomentComment(models.Model):
     class Meta:
         verbose_name = u"8.发现的评论"
 
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        self.content = dfa_filter.filter(self.content, "*")
+        super().save(force_insert, force_update, using, update_fields)
+
 
 class Moment(models.Model):
     """
@@ -249,6 +264,29 @@ class Moment(models.Model):
 
     def __str__(self):
         return str(self.id)
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        self.content = dfa_filter.filter(self.content, "*")
+        super().save(force_insert, force_update, using, update_fields)
+
+
+class Accusement(models.Model):
+    """
+        举报
+    """
+    user = models.ForeignKey(User, verbose_name="举报用户", related_name="Accusement_user")
+    accused_user = models.ForeignKey(User, verbose_name="被举报的用户", related_name='Accusement_accused_user')
+    content = models.CharField(max_length=2048, verbose_name="举报内容")
+    is_reviewed = models.BooleanField(default=False, verbose_name="是否屏蔽被举报用户")
+
+    class Meta:
+        verbose_name = u"0.举报信息"
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        if self.is_reviewed:
+            self.accused_user.is_blocked = True
+            self.accused_user.save()
+        super().save(force_insert, force_update, using, update_fields)
 
 
 class ThumbUp(models.Model):

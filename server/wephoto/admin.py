@@ -135,3 +135,7 @@ class MomentCommentAdmin(admin.ModelAdmin):
 @admin.register(AppConfig)
 class AppConfigAdmin(admin.ModelAdmin):
     list_display = ('id', 'server', 'alipay', 'wechat', 'in_use')
+
+@admin.register(Accusement)
+class AccusementAdmin(admin.ModelAdmin):
+    pass

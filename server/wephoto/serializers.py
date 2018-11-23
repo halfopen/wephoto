@@ -22,6 +22,7 @@ class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)  # 不可查看
     # token = serializers.CharField(read_only=True)  # 不可查看
     is_reviewed = serializers.IntegerField(read_only=True) # 没有权限修改
+    is_blocked = serializers.BooleanField(read_only=True)
     date = serializers.DateTimeField(read_only=True)
 
     class Meta:
@@ -34,6 +35,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
     # token = serializers.CharField(write_only=True)  # 不可查看
     # password = serializers.CharField(write_only=True)  # 不可查看
     is_reviewed = serializers.IntegerField(read_only=True) # 没有权限修改
+    is_blocked = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = User
@@ -114,6 +116,13 @@ class PaymentSerializer(serializers.ModelSerializer):
         model = Payment
         fields = '__all__'
 
+
+class AccusementSerializer(serializers.ModelSerializer):
+    is_reviewed = serializers.BooleanField(read_only=True)
+
+    class Meta:
+        model = Accusement
+        fields = '__all__'
 
 class WithdrawSerializer(serializers.ModelSerializer):
 

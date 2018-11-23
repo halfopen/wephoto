@@ -18,6 +18,7 @@ router.register(r'thumbup', ThumbUpSet)
 router.register(r'app_config', AppConfigSet)
 router.register(r'payment', PaymentSet)
 router.register(r'withdraw', WithdrawSet)
+router.register(r'accusement', AccusementSet)
 
 router.register(r'moment_detail', MomentDetailSet, base_name='moment_detail')
 router.register(r'user_detail', UserDetailSet, base_name='user_detail')

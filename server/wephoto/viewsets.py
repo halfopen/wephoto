@@ -10,6 +10,8 @@ from rest_framework import status
 from django.http import Http404
 
 
+
+
 class ReviewSet(viewsets.ModelViewSet):
     queryset = Review.objects.order_by("-id").all()
     serializer_class = ReviewSerializer
@@ -107,7 +109,7 @@ class UserDetailSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         # 取出所有摄影师，按订单数排序
-        queryset = User.objects.order_by('-id').all()
+        queryset = User.objects.order_by('-id').filter(is_blocked=False).all()
 
         price_min = self.request.query_params.get("price_min", None)
         price_max = self.request.query_params.get("price_max", None)
@@ -159,7 +161,7 @@ class UserDetailSet(viewsets.ModelViewSet):
 
 class MomentSet(viewsets.ModelViewSet):
     serializer_class = MomentSerializer
-    queryset = Moment.objects.order_by("-id").all()
+    queryset = Moment.objects.order_by("-id").filter(user__is_blocked=False).all()
 
 
 class MomentDetailSet(viewsets.ModelViewSet):
@@ -167,7 +169,7 @@ class MomentDetailSet(viewsets.ModelViewSet):
     http_method_names = ["get"]
 
     def get_queryset(self):
-        query_set = Moment.objects.order_by("-id").all()
+        query_set = Moment.objects.order_by("-id").filter(user__is_blocked=False).all()
         user = self.request.query_params.get("user", None)
         if user:
             try:
@@ -190,7 +192,7 @@ class MomentDetailSet(viewsets.ModelViewSet):
 
 class MomentCommentSet(viewsets.ModelViewSet):
     serializer_class = MomentCommentSerializer
-    queryset = MomentComment.objects.order_by("-id").all()
+    queryset = MomentComment.objects.order_by("-id").filter(user__is_blocked=False).all()
 
 
 class ThumbUpSet(viewsets.ModelViewSet):
@@ -226,3 +228,8 @@ class WithdrawSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     # 等值
     filter_fields = ('user', )
+
+
+class AccusementSet(viewsets.ModelViewSet):
+    serializer_class = AccusementSerializer
+    queryset = Accusement.objects.order_by('-id').all()
