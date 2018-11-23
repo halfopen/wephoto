@@ -276,7 +276,7 @@ class Accusement(models.Model):
     """
     user = models.ForeignKey(User, verbose_name="举报用户", related_name="Accusement_user")
     accused_user = models.ForeignKey(User, verbose_name="被举报的用户", related_name='Accusement_accused_user')
-    content = models.CharField(max_length=2048, verbose_name="举报内容")
+    content = models.CharField(max_length=2048, verbose_name="举报内容", default="")
     is_reviewed = models.BooleanField(default=False, verbose_name="是否屏蔽被举报用户")
 
     class Meta:
