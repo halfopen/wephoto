@@ -122,7 +122,7 @@ class DFAFilter():
 
     def parse(self, path):
         print("open filter keywords", path)
-        with open(path) as f:
+        with open(path, encoding="utf-8") as f:
             for keyword in f:
                 self.add(keyword.strip())
 
